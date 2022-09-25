@@ -8,3 +8,32 @@
     <h1 class="display-4">Welcome</h1>
     <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">buildintesg Web apps with ASP.NteteteET Core</a>.</p>
 </div>
+
+
+<table class="table">
+    <thead>
+        <tr>
+            <th scope="col">ID</th>
+            <th scope="col">Username</th>
+            <th scope="col">password</th>
+            <th scope="col">role</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Model.tb_Users != null)
+        {
+            foreach (var item in Model.tb_Users)
+            {
+                <tr style="color:black;">
+                    <td scope="col">@item.user_id</td>
+                    <td scope="col">@item.username</td>
+                    <td scope="col">@item.password</td>
+                    <td scope="col">@item.role_id</td>
+                </tr>
+            }
+        }
+
+
+    </tbody>
+
+</table>

@@ -19,15 +19,17 @@ namespace ProductRecomendation
 {
     public class Startup
     {
+        public IConfiguration Configuration { get; }
+
+        public static IConfiguration _configuration = null;
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
+            _configuration = configuration;
         }
 
-        public IConfiguration Configuration { get; }
-
         // This method gets called by the runtime. Use this method to add services to the container.
-        public void ConfigureServices(IServiceCollection services)//tes123123123
+        public void ConfigureServices(IServiceCollection services)
         {
             services.AddRazorPages();
 
@@ -70,6 +72,8 @@ namespace ProductRecomendation
             app.UseHttpsRedirection();
             app.UseStaticFiles();
 
+            app.UseAuthentication();
+
             app.UseRouting();
 
             app.UseAuthorization();
@@ -77,6 +81,7 @@ namespace ProductRecomendation
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapRazorPages();
+                endpoints.MapControllers();
             });
         }
     }
