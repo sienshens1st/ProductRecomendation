@@ -1,39 +1,142 @@
 ﻿@page
 @model IndexModel
 @{
-    ViewData["Title"] = "Home page";
+    ViewData["Title"] = "Login";
+    Layout = null;
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">buildintesg Web apps with ASP.NteteteET Core</a>.</p>
-</div>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>EPR - @ViewData["Title"]</title>
+    <!-- Custom fonts for this template-->
+    <link href="~/potionLib/vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
 
+    <!-- Custom styles for this template-->
+    <link href="~/potionLib/css/potion-bs.css" rel="stylesheet">
 
-<table class="table">
-    <thead>
-        <tr>
-            <th scope="col">ID</th>
-            <th scope="col">Username</th>
-            <th scope="col">password</th>
-            <th scope="col">role</th>
-        </tr>
-    </thead>
-    <tbody>
-        @if (Model.tb_Users != null)
-        {
-            foreach (var item in Model.tb_Users)
-            {
-                <tr style="color:black;">
-                    <td scope="col">@item.user_id</td>
-                    <td scope="col">@item.username</td>
-                    <td scope="col">@item.password</td>
-                    <td scope="col">@item.role_id</td>
-                </tr>
+    <style>
+        div.card {
+            width: 250px;
+            box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.10);
+            text-align: center;
+        }
+
+        html, body {
+            max-width: 100%;
+            overflow-x: hidden;
+            height: 100%;
+            background-color: rgb(30,0,64);
+            background-image: linear-gradient(47deg, rgba(97, 192, 47, 0.8) 0%, rgba(48, 163, 59, 0.8) 28%, rgba(28, 151, 64, 0.8) 57%, rgba(11, 141, 69, 0.8) 100%);
+        }
+
+        .form-control::-webkit-input-placeholder {
+            color: #ffffff;
+        }
+
+        @@media only screen and (min-width: 519px) {
+            .show-mobile {
+                display: none;
             }
         }
 
+        @@media only screen and (max-width: 518px) {
+            .show-large {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <form method="post">
+        <div class="row min-vh-100">
 
-    </tbody>
+            <div class="col-sm-6 col-xs-6 col-md-6 col-lg-6 col-xl-6 bg-white vh-100 d-table" id="landing">
+                <div class="row d-table-cell" style="vertical-align: middle;">
+                    <div class="col text-center clearfix dd-flex my-auto justify-content-center">
+                        <img src="~/images/SideMenu.svg" class="w-75 m-5">
+                        <a class="btn btn-outline-dark mt-5 show-mobile" href="#signin" role="button" style="border-radius: 15px" onclick="show()">Click here to sign in</a>
+                    </div>
+                </div>
 
-</table>
+            </div>
+
+            <form method="post" autocomplete="off">
+                <div class="col-sm-6 col-xs-6 col-md-6 col-lg-6 col-xl-6 clearfix dd-flex my-auto justify-content-center show-large" id="signin">
+                    <div class="w-75 mx-auto" style="vertical-align: middle">
+                        <h1 class="text-white montserrat mt-5 font-weight-bolder">Enseval Product Recommendation</h1>
+                        @if (TempData["MessageFailed"] != null)
+                        {
+                            <div class="alert alert-danger mt-2" role="alert" id="alertFailedTemp">
+                                <button type="button" class="close" data-dismiss="alert">&times;</button>
+                                <i class="fas fa-fw fa-solid fa-exclamation-triangle"></i> @TempData["MessageFailed"]
+                            </div>
+                        }
+                        <input type="text" autocomplete="off" class="form-control mb-4 text-white" asp-for="Input.username" style="box-sizing: border-box; border: none; border-bottom: 2px solid #ffffff; background-color: transparent; width: 100%;" placeholder="Username">
+                        <input type="password" autocomplete="off" class="form-control mb-3 mt-5 text-white" asp-for="Input.password" style="box-sizing: border-box; border: none; border-bottom: 2px solid #ffffff; background-color: transparent; width: 100%" placeholder="Password">
+
+                        <div class="mb-3">
+                            <button type="submit" class="btn btn-outline-light float-right" style="border-radius: 15px">Sign in</button>
+                            <div class="btn btn-link text-white" style="cursor:pointer;" data-toggle="modal" data-target="#ModalInfo"><u>You don't have an account?</u></div>
+
+                        </div>
+                    </div>
+                </div>
+            </form>
+
+        </div>
+    </form>
+
+
+    <div class="modal fade" id="ModalInfo" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-md" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Information</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="text-center p-5">
+                        <img class="mb-4 w-75" src="potionLib/img/warning.svg">
+                        <h4 class="font-weight-bolder">Registration Info</h4>
+                        <p class="font-weight-bold">To get an account, You can register by contacting<br />our customer service (1500095)</p>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <a class="btn btn-secondary text-white" data-dismiss="modal" aria-label="Cancel">Close</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap core JavaScript-->
+    <script src="~/potionLib/vendor/jquery/jquery-3.6.0.min.js"></script>
+    <script src="~/potionLib/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Core plugin JavaScript-->
+    <script src="~/potionLib/vendor/jquery-easing/jquery.easing.min.js"></script>
+
+    <script>
+        $(document).ready(function () {
+            if($('#alertFailedTemp').is(':visible')){
+                $("#alertFailedTemp").fadeTo(3000, 500).slideUp(500, function(){
+                $("#alertFailedTemp").slideUp(500);
+                });
+            };
+        });
+
+        function show() {
+            var landing = document.getElementById("landing");
+            var signin = document.getElementById("signin");
+
+            landing.classList.remove("d-table");
+            landing.classList.add("d-none");
+            signin.classList.remove("show-large");
+        }
+    </script>
+</body>
+</html>
+

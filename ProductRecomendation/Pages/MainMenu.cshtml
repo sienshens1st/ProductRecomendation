@@ -1,0 +1,84 @@
+﻿@page
+@model egitlab_PotionNetCore.Pages.MainMenuModel
+@{
+    ViewData["Title"] = "Main Menu";
+}
+
+<style>
+    .sidebar {
+        display: none;
+    }
+
+    footer.sticky-footer {
+        width: 100%;
+    }
+</style>
+
+<!-- Breadcrumbs -->
+<ol class="breadcrumb">
+    <li class="breadcrumb-item font-weight-bold">
+        Main Menu
+    </li>
+</ol>
+
+<!-- Content -->
+<div class="card">
+    <div class="card-body">
+        <div class="row mt-1">
+
+            @if (User.Claims.FirstOrDefault(c => c.Type == "role")?.Value == "admin")
+            {
+
+                <div class="col-lg-4 mb-4" id="menuUserManagement">
+                    <a href="~/UserManagement" class="card border-0 rounded shadow text-decoration-none">
+                        <img class="card-img-top bg-light pl-5 pr-5 pt-4 pb-4 rounded-top" style="height: 190px" src="~/images/GroupMenu.svg">
+                        <div class="card-body">
+                            <h5 class="card-text montserrat font-weight-bold text-dark">User Management</h5>
+                        </div>
+                    </a>
+                </div>
+                <div class="col-lg-4 mb-4" id="menuProductManagement">
+                    <a href="~/ProductManagement" class="card border-0 rounded shadow text-decoration-none">
+                        <img class="card-img-top bg-light pl-5 pr-5 pt-4 pb-4 rounded-top" style="height: 190px" src="~/images/SideMenu.svg">
+                        <div class="card-body">
+                            <h5 class="card-text montserrat font-weight-bold text-dark">Product Management</h5>
+                        </div>
+                    </a>
+                </div>
+                <div class="col-lg-4 mb-4" id="menuUploadTransaksi">
+                    <a href="~/UploadTransaction" class="card border-0 rounded shadow text-decoration-none">
+                        <img class="card-img-top bg-light pl-5 pr-5 pt-4 pb-4 rounded-top" style="height: 190px" src="~/images/upload_template.svg">
+                        <div class="card-body">
+                            <h5 class="card-text montserrat font-weight-bold text-dark">Upload Transaction</h5>
+                        </div>
+                    </a>
+                </div>
+                <div class="col-lg-4 mb-4" id="menuRekomendasiUser">
+                    <a href="~/RecommendationSystem" class="card border-0 rounded shadow text-decoration-none">
+                        <img class="card-img-top bg-light pl-5 pr-5 pt-4 pb-4 rounded-top" style="height: 190px" src="~/images/PaperMenu.svg">
+                        <div class="card-body">
+                            <h5 class="card-text montserrat font-weight-bold text-dark">Recommendation System</h5>
+                        </div>
+                    </a>
+                </div>
+
+            }
+            else if (User.Claims.FirstOrDefault(c => c.Type == "role")?.Value == "salesman")
+            {
+                <div class="col-lg-4 mb-4" id="menuRekomendasiUser">
+                    <a href="~/RecommendationSystem" class="card border-0 rounded shadow text-decoration-none">
+                        <img class="card-img-top bg-light pl-5 pr-5 pt-4 pb-4 rounded-top" style="height: 190px" src="~/images/PaperMenu.svg">
+                        <div class="card-body">
+                            <h5 class="card-text montserrat font-weight-bold text-dark">Recommendation System</h5>
+                        </div>
+                    </a>
+                </div>
+            }
+
+        </div>
+    </div>
+</div>
+
+<script>
+
+</script>

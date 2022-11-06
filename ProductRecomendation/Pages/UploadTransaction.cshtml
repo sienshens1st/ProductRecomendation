@@ -1,0 +1,162 @@
+﻿@page
+@model ProductRecomendation.Pages.UploadTransactionModel
+@{
+    ViewData["Title"] = "Upload Transaction";
+}
+
+<!-- Breadcrumbs -->
+<ol class="breadcrumb">
+    <li class="breadcrumb-item font-weight-bold">
+        Upload Transaction
+    </li>
+</ol>
+
+<!-- Content -->
+<div class="card">
+    <div class="card-body">
+        <div class="card-title row mb-2">
+            <div class="col float-left">
+                <h1 class="bd-title montserrat font-weight-bold mb-2" id="content">Upload Transaction</h1>
+            </div>
+        </div>
+
+
+        @if (TempData["MessageFailed"] != null)
+        {
+            <div class="alert alert-warning mt-2 alert-dismissible fade show" role="alert" id="alertFailed">
+                <button type="button" class="close" data-dismiss="alert">&times;</button>
+                <i class="fas fa-fw fa-solid fa-exclamation-triangle"></i> @TempData["MessageFailed"]
+            </div>
+        }
+
+        @if (TempData["MessageSuccess"] != null)
+        {
+            <div class="alert alert-success mt-2 alert-dismissible fade show" role="alert" id="alertSuccess">
+                <button type="button" class="close" data-dismiss="alert">&times;</button>
+                @TempData["MessageSuccess"]
+            </div>
+        }
+
+        <!--Card-->
+        <div class="card">
+            <div class="card-header">Upload</div>
+            <div class="card-body d-flex flex-column justify-content-center align-items-center">
+                <div class="row">
+                    <div class="col-sm"></div>
+                    <div class="col-sm-12">
+                        <div class="card p-2 text-center" style="border:none;">
+                            <div class="mt-2"> <p>Select Transaction Period:</p> </div>
+                             <input id="uploadDatePick" class="form-control w-100 text-center" type="text" placeholder="Choose Date" onchange="checkUploadDatePick(this)" autocomplete="off" />
+                            <div class="mt-2">
+                            </div>
+                            <div id="otp" class="inputs d-flex flex-row justify-content-center">
+                                <button type="button" class="btn ml-2 btn-block btn-primary text-center" style="white-space:nowrap;" data-toggle="modal" data-target="#ModalUpload" onclick="bindTranscationDate()" id="btnUploadTransaction" disabled>Select File</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="ModalUpload" tabindex="-1" role="dialog" aria-hidden="true">
+    <form method="post" id="formUpload" enctype="multipart/form-data">
+        <div class="modal-dialog modal-md" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Upload File</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <input type="text" asp-for="@Model.transactionDate" id="hdnTranscationDate" />
+                <div class="modal-body">
+                    <div class="custom-file">
+                        <input type="file" class="custom-file-input" name="uploadedFile" id="fileInput" accept=".csv" onchange="fileValidationUpload(this)" required>
+                        <label class="custom-file-label" for="fileInput">Choose file...</label>
+                    </div>
+                </div>
+                <div class="modal-footer" style="display:block;">
+                    <div>
+                        <label id="labelConfirmation" style="display:none;">Are you sure want to upload? If there is already existing transaction file, it will be replaced and cannot be undone.</label>
+                        <label id="labelFile" class="text-danger" style="display:none;">File is required!</label>
+                    </div>
+                    <div style="display:flex!important;justify-content:flex-end;">
+                        <a class="btn btn-secondary text-white mr-2" id="btnConfirmationCancel" style="display:none;" data-dismiss="modal" aria-label="Cancel">No</a>
+                        <button type="button" id="btnUploadTemplateAdmin" class="btn btn-primary text-white" onclick="btnConfirmationClick($('#fileInput').val())">Upload</button>
+                        <input type="submit" class="btn btn-warning text-white" id="btnUpload" style="display:none;" aria-label="Yes" value="Yes" form="formUpload" />
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+
+<script>
+     $(document).ready(function(){
+      $("#uploadDatePick").datepicker({
+         format: "mm-yyyy",
+         startView: "months", 
+         minViewMode: "months",
+         autoclose:true
+      });
+    });
+
+    
+       function btnConfirmationClick(){
+           if($("#fileInput")[0].files.length == 0){
+               $("#labelFile").show();
+           }else{
+              $("#labelFile").hide();
+              $("#btnUploadTemplateAdmin").hide();
+              $("#labelConfirmation").show();
+              $("#btnConfirmationCancel").show();
+              $("#btnUpload").show();
+           }
+       }
+
+
+           //validasi tipe input file admin
+         var _validFileExtensions = [".csv"];
+        function fileValidationUpload(data) {
+            var fileInputHtml = $("#fileInput");
+            for (var i = 0; i < fileInputHtml.length; i++) {
+                var Input = fileInputHtml[i];
+                if (Input.type == "file") {
+                    var sFileName = Input.value;
+                    if (sFileName.length > 0) {
+                        var blnValid = false;
+                        for (var j = 0; j < _validFileExtensions.length; j++) {
+                            var sCurExtension = _validFileExtensions[j];
+                            if (sFileName.substr(sFileName.length - sCurExtension.length, sCurExtension.length).toLowerCase() == sCurExtension.toLowerCase()) {
+                                blnValid = true;
+                                break;
+                            }
+                        }
+
+                        if (!blnValid) {
+                            fileInputHtml.val("");
+                            alert("You can only upload .csv files.");
+                        }
+                    }
+                }
+            }
+        }//end function filevalidation
+
+        function bindTranscationDate(){
+           $("#hdnTranscationDate").val($("#uploadDatePick").val());
+        }
+
+        function checkUploadDatePick(arg){
+            if(arg.value.length =   = 0){
+                $('#btnUploadTransaction').attr('disabled', 'disabled');
+            }else{
+                 $('#btnUploadTransaction').removeAttr("disabled");
+            }
+        }
+
+</script>
+
