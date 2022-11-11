@@ -8,7 +8,7 @@ namespace ProductRecomendation.Models
     {
         [Key]
         public int transaction_id { get; set; }
-        public DateTime transaction_date { get; set; }
+        public string transaction_date { get; set; }
         public string file_location { get; set; }
     }
 }

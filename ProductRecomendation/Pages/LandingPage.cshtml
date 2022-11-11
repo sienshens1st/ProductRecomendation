@@ -1,4 +1,148 @@
 ﻿@page
 @model ProductRecomendation.Pages.LandingPageModel
 @{
+    ViewData["Title"] = "Enseval Product Recommendation";
 }
+
+<style>
+    .sidebar {
+        display: none;
+    }
+
+    footer.sticky-footer {
+        width: 100%;
+    }
+
+    .imgHover {
+        cursor: pointer;
+    }
+</style>
+<!-- Icon Cards-->
+<div class="container">
+    <a href="#"><img class="d-block w-100" src="~/images/Iklan_Eno.svg" alt="First slide"></a>
+
+
+</div>
+
+
+
+<div class="container">
+
+    @if (TempData["MessageFailed"] != null)
+    {
+        <div class="alert alert-warning mt-2 alert-dismissible fade show" role="alert" id="alertFailedTemp">
+            <button type="button" class="close" data-dismiss="alert">&times;</button>
+            <i class="fas fa-fw fa-solid fa-exclamation-triangle"></i> @TempData["MessageFailed"]
+        </div>
+
+    }
+    <div class="card-body">
+        <form method="post">
+            <h2 class="font-weight-bold my-3">Recommendation for you</h2>
+            <div class="form-row align-items-end">
+                <div class="form-group col-sm-3">
+                    <label class="control-label" for="SubmissionDateFrom">Recommendation Date:</label>
+                    <input id="searchDatePick" class="form-control w-100" type="text" placeholder="Choose Date" asp-for="@Model.recommendationDate" required autocomplete="off" />
+                </div>
+                <div class="form-group col-sm-3 d-flex align-items-end">
+                    <button type="submit" class="btn btn-success btn-light btn-block text-dark">Search</button>
+                </div>
+
+            </div>
+        </form>
+        <!--Card-->
+        @if (Model.outRecommendationList != null)
+        {
+            <div class="table">
+                <table id="tableRec" class="table table-hover table-bordered mb-3" width="100%" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th width="50px">No</th>
+                            <th>Item Code</th>
+                            <th>Item Name</th>
+
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @{
+                            int index = 1;
+                            foreach (var item in Model.outRecommendationList)
+                            {
+                                <tr>
+                                    <td>@index</td>
+                                    <td>@item.item_code</td>
+                                    <td>@item.item_desc</td>
+                                </tr>
+                                index++;
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+            <!-- card end-->
+
+            <div class="table">
+                <h2 class="font-weight-bold my-3">Transaction History:</h2>
+                <table id="tableHistory" class="table table-hover table-bordered" width="100%" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th width="50px">No</th>
+                            <th>Transaction Date</th>
+                            <th>Item Code</th>
+                            <th>Item Name</th>
+                            <th>Quantity</th>
+                            <th>Total Amount</th>
+
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @{
+                            int index2 = 1;
+                            foreach (var item in Model.outTransactionHistoryList)
+                            {
+                                <tr>
+                                    <td>@index2</td>
+                                    <td>@item.TRX_DATE</td>
+                                    <td>@item.ITEM_CODE</td>
+                                    <td>@item.ITEM_NAME</td>
+                                    <td>@item.SALES_QTY</td>
+                                    <td>@item.GROSS_SALES_AMOUNT</td>
+                                </tr>
+                                index2++;
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+
+        }
+
+    </div>
+</div>
+
+
+<script>
+     $(document).ready(function(){
+
+    $("#searchDatePick").datepicker({
+       format: "mm-yyyy",
+       startView: "months",
+       endDate: '+1m',
+       minViewMode: "months",
+       autoclose:true
+    });
+
+       $("#tableRec").DataTable({
+        paging: false,
+        info: false,
+       });
+
+        $("#tableHistory").DataTable({
+       });
+
+    });
+
+
+
+</script>

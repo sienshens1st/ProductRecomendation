@@ -1,3 +1,4 @@
+using egitlab_PotionNetCore.Security;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
@@ -10,6 +11,7 @@ using System.Threading.Tasks;
 
 namespace ProductRecomendation.Pages
 {
+    [AuthorizeCustom(Role.admin)]
     public class UserManagementModel : PageModel
     {
 

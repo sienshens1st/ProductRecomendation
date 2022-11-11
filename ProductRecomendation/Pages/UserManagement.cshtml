@@ -149,7 +149,7 @@
             </div>
             <form id="formEditUser" asp-page-handler="EditUser" method="post">
                 <div class="modal-body">
-                    <input type="text" id="hdnUserId_Edit" asp-for="InputEditUser.user_id" value="" />
+                    <input type="hidden" id="hdnUserId_Edit" asp-for="InputEditUser.user_id" value="" />
                     <div class="form-group">
                         <label for="Username">Username <span class="text-danger">*</span></label>
                         <input type="text" class="form-control" id="txtUsernameEdit" placeholder="Username" asp-for="InputEditUser.username" readonly>

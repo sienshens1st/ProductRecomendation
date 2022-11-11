@@ -144,7 +144,7 @@
             </div>
             <form id="formEditProduct" asp-page-handler="EditProduct" method="post">
                 <div class="modal-body">
-                    <input type="text" id="hdnItemId_Edit" asp-for="InputEditProduct.item_id" value="" />
+                    <input type="hidden" id="hdnItemId_Edit" asp-for="InputEditProduct.item_id" value="" />
                     <div class="form-group">
                         <label for="ItemCode">Product Code <span class="text-danger">*</span></label>
                         <input type="text" class="form-control" id="txtItemCodeEdit" placeholder="Product Code" asp-for="InputEditProduct.item_code" readonly>
