@@ -83,6 +83,7 @@
 
             <div class="table">
                 <h2 class="font-weight-bold my-3">Transaction History:</h2>
+                <h3>@Model.historyInfo</h3>
                 <table id="tableHistory" class="table table-hover table-bordered" width="100%" cellspacing="0">
                     <thead>
                         <tr>
@@ -105,8 +106,8 @@
                                     <td>@item.TRX_DATE</td>
                                     <td>@item.ITEM_CODE</td>
                                     <td>@item.ITEM_NAME</td>
-                                    <td>@item.SALES_QTY</td>
-                                    <td>@item.GROSS_SALES_AMOUNT</td>
+                                    <td class="text-right">@item.SALES_QTY</td>
+                                    <td class="text-right">@item.GROSS_SALES_AMOUNT</td>
                                 </tr>
                                 index2++;
                             }

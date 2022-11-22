@@ -1,3 +1,4 @@
+using ClosedXML.Excel;
 using egitlab_PotionNetCore.Pages;
 using egitlab_PotionNetCore.Security;
 using Microsoft.AspNetCore.Mvc;
@@ -9,6 +10,8 @@ using ProductRecomendation.Models;
 using RestSharp;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -48,7 +51,7 @@ namespace ProductRecomendation.Pages
 
         public IList<OutputRecommendation> outRecommendationList { get; set; }
 
-
+        public bool isSearched = false;
 
         UrlString conf = new UrlString();
         public async Task OnGetAsync()
@@ -116,10 +119,89 @@ namespace ProductRecomendation.Pages
             Console.Write(outRecommendationList);
 
             await loadDdlCustomer(role, rayon);
+            isSearched = true;
         }
 
 
+        public async Task<IActionResult> OnPostExportAsync(string recDate, string shipTo)
+        {
+            string role = HttpContext.User.Claims.FirstOrDefault(x => x.Type == "role").Value;
+            string rayon = HttpContext.User.Claims.FirstOrDefault(x => x.Type == "rayon_exp_code").Value;
 
+            string pickedDate = recDate;
+            string pickedUser = shipTo;
+
+            int splitmonth;
+
+            if (int.Parse(pickedDate.Split('-')[0]) == 1)
+            {
+                splitmonth = 12;
+            }
+            else
+            {
+                splitmonth = int.Parse(pickedDate.Split('-')[0]);
+            };
+
+            var month = CultureInfo.InvariantCulture.DateTimeFormat.GetMonthName(splitmonth);
+
+            var filename = pickedUser + "_" + month + "_Recommendation.xlsx";
+
+
+            bool isDataExist = _context.tb_transaction.Where(x => x.transaction_date == pickedDate).Any();
+
+            if (!isDataExist)
+            {
+                TempData["MessageFailed"] = "Data Transaction didn't exist.";
+                await loadDdlCustomer(role, rayon);
+                return Page();
+            }
+
+            var result = await getRecommendation(pickedDate, pickedUser);
+            if (result.IsSuccessful != true)
+            {
+                TempData["MessageFailed"] = result.Content;
+                await loadDdlCustomer(role, rayon);
+                return Page();
+            }
+
+            outRecommendationList = new List<OutputRecommendation>();
+            var listResult = JsonConvert.DeserializeObject<IList<string>>(result.Content);
+
+            foreach (var item in listResult)
+            {
+                var itemName = _context.tb_product.Where(x => x.item_code == item).FirstOrDefault().item_desc.ToString();
+                outRecommendationList.Add(new OutputRecommendation { item_code = item, item_desc = itemName });
+            };
+
+
+
+
+            using (XLWorkbook wb = new XLWorkbook())
+            {
+                var ws = wb.Worksheets.Add("Recommendation");
+                ws.Columns().AdjustToContents();
+                ws.Cell(1, 1).Value = "Customer:";
+                ws.Cell(1, 2).Value = pickedUser;
+                ws.Cell(2, 1).Value = "Recommendation for:";
+                ws.Cell(2, 2).DataType = XLDataType.Text;
+                ws.Cell(2, 2).Value = "'"+ month + " - " + pickedDate.Split('-')[1];
+
+                ws.Cell(4, 1).Value = "ITEM CODE";
+                ws.Cell(4, 1).Style.Font.Bold = true;
+                ws.Cell(4, 2).Value = "ITEM DESCRIPTION";
+                ws.Cell(4, 2).Style.Font.Bold = true;
+                ws.Cell(5, 1).InsertData(outRecommendationList);
+                ws.Columns().AdjustToContents();
+
+                using (MemoryStream MyMemoryStream = new MemoryStream())
+                {
+                    wb.SaveAs(MyMemoryStream);
+                    isSearched = false;
+                    return File(MyMemoryStream.ToArray(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", filename);
+                }
+            }
+
+        }
 
         public async Task<IRestResponse> getRecommendation(string filename, string customer)
         {

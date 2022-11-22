@@ -61,9 +61,17 @@
             </form>
         </div>
 
-        <div class="float-right mb-3" id="btnExportId">
-             <button type="submit" class="btn btn-success btn-lg text-white">Export Excel</button>
-        </div>
+        @if (Model.isSearched == true)
+        {
+            <form method="post" asp-page-handler="Export" id="formExport">
+                <div class="float-right mb-3" id="btnExportId">
+                    <input type="hidden" asp-for="@Model.Input.recommendationDate" name="recDate" />
+                    <input type="hidden" asp-for="@Model.Input.customerShipTo" name="shipTo" />
+                    <button type="submit" class="btn btn-success text-white" form="formExport">Export Excel</button>
+                </div>
+            </form>
+        }
+
 
         <!--Card-->
         <div class="table-responsive">
@@ -152,7 +160,7 @@
 
 <script>
        $(document).ready(function(){
-           
+
       $("#searchDatePick").datepicker({
          format: "mm-yyyy",
          startView: "months",
@@ -244,7 +252,7 @@
 
 
 
-        $("#tableRec").DataTable({ 
+        $("#tableRec").DataTable({
     //    buttons: [
     //        'excelBt'
     //    ],

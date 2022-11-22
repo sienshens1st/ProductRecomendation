@@ -6,6 +6,7 @@ using ProductRecomendation.Data;
 using RestSharp;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -40,6 +41,8 @@ namespace ProductRecomendation.Pages
         public IList<OutputRecommendation> outRecommendationList { get; set; }
 
         public IList<TransactionHistory> outTransactionHistoryList { get; set; }
+
+        public string historyInfo { get; set; }
 
 
         UrlString conf = new UrlString();
@@ -94,7 +97,7 @@ namespace ProductRecomendation.Pages
 
             //get transaction history
 
-            var result2 = await getTransactionHistory(recommendationDate, username);
+             var result2 = await getTransactionHistory(recommendationDate, username);
             if (result2.IsSuccessful != true)
             {
                 TempData["MessageFailed"] = result2.Content;
@@ -107,15 +110,33 @@ namespace ProductRecomendation.Pages
 
             foreach (var item in listResultHistory)
             {
+                var grossvalue = String.Format(CultureInfo.CreateSpecificCulture("id-id"), "Rp. {0:N}", int.Parse(item.GROSS_SALES_AMOUNT));
+                var trans_date_parsed = DateTime.ParseExact(item.TRX_DATE, "MM/dd/yyyy",
+                                       System.Globalization.CultureInfo.InvariantCulture).ToString("dd-MMM-yyyy");
                 var itemName = _context.tb_product.Where(x => x.item_code == item.ITEM_CODE).FirstOrDefault().item_desc.ToString();
                 outTransactionHistoryList.Add(new TransactionHistory { 
                     ITEM_CODE = item.ITEM_CODE, 
                     ITEM_NAME = itemName,
                     SALES_QTY = item.SALES_QTY,
-                    GROSS_SALES_AMOUNT = item.GROSS_SALES_AMOUNT,
-                    TRX_DATE = item.TRX_DATE
+                    GROSS_SALES_AMOUNT = grossvalue.Remove(grossvalue.Length - 1),
+                    TRX_DATE = trans_date_parsed
                 });
             };
+
+            int splitmonth;
+
+            if (int.Parse(recommendationDate.Split('-')[0]) == 1)
+            {
+                splitmonth = 12;
+            }
+            else {
+                splitmonth = int.Parse(recommendationDate.Split('-')[0]) - 1;
+            };
+        
+
+            var month = CultureInfo.InvariantCulture.DateTimeFormat.GetMonthName(splitmonth);
+            var year = recommendationDate.Split('-')[1];
+            historyInfo = String.Format("25 {0} {1} - 25 {0} {2} ", month, int.Parse(year)-1 ,year); 
 
         }
 
