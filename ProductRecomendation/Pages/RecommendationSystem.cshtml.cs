@@ -131,16 +131,7 @@ namespace ProductRecomendation.Pages
             string pickedDate = recDate;
             string pickedUser = shipTo;
 
-            int splitmonth;
-
-            if (int.Parse(pickedDate.Split('-')[0]) == 1)
-            {
-                splitmonth = 12;
-            }
-            else
-            {
-                splitmonth = int.Parse(pickedDate.Split('-')[0]);
-            };
+            int splitmonth = int.Parse(pickedDate.Split('-')[0]);
 
             var month = CultureInfo.InvariantCulture.DateTimeFormat.GetMonthName(splitmonth);
 
