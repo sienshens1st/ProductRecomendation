@@ -16,7 +16,133 @@
     .imgHover {
         cursor: pointer;
     }
+
+    .content-wrapper {
+        display: none;
+    }
 </style>
+
+<style>
+
+    /*--------------------------------------------------------------
+    # Hero Section
+    --------------------------------------------------------------*/
+
+    .hero:before {
+        content: "";
+        background: url(/images/landingpage/hero-bg.png) top center no-repeat;
+        background-size: contain;
+        position: absolute;
+        width: 2000px;
+        margin-left: auto;
+        margin-right: auto;
+        left: 0;
+        right: 0;
+        z-index: -1;
+    }
+
+    a:hover {
+        color: #717ff5;
+        text-decoration: none;
+    }
+
+    .hero {
+        width: 100%;
+        height: 80vh;
+        /*  background: url(/images/landingpage/hero-bg.png) top center no-repeat;
+      background-size: cover;*/
+    }
+
+        .hero h1 {
+            margin: 0;
+            font-size: 48px;
+            font-weight: 700;
+            color: #00ab41;
+        }
+
+        .hero h2 {
+            color: #444444;
+            margin: 15px 0 0 0;
+            font-size: 26px;
+        }
+
+
+
+        .hero .btn-get-started {
+            margin-top: 30px;
+            line-height: 0;
+            padding: 15px 40px;
+            border-radius: 4px;
+            transition: 0.5s;
+            color: #fff;
+            background: #5ced73;
+            box-shadow: 0px 5px 30px rgba(131, 242, 143, 0.4);
+        }
+
+            .hero .btn-get-started span {
+                font-family: "Nunito", sans-serif;
+                font-weight: 600;
+                font-size: 16px;
+                letter-spacing: 1px;
+            }
+
+            .hero .btn-get-started i {
+                margin-left: 5px;
+                font-size: 18px;
+                transition: 0.3s;
+            }
+
+            .hero .btn-get-started:hover i {
+                transform: translateX(5px);
+            }
+
+        .hero .hero-img {
+            text-align: right;
+        }
+
+    @@media (min-width: 1024px) {
+        .hero {
+            background-attachment: fixed;
+        }
+    }
+
+    @@media (max-width: 991px) {
+        .hero {
+            height: auto;
+            padding: 120px 0 60px 0;
+        }
+
+            .hero .hero-img {
+                text-align: center;
+                margin-top: 80px;
+            }
+
+                .hero .hero-img img {
+                    width: 80%;
+                }
+    }
+
+    @@media (max-width: 768px) {
+        .hero {
+            text-align: center;
+        }
+
+            .hero h1 {
+                font-size: 32px;
+            }
+
+            .hero h2 {
+                font-size: 24px;
+            }
+
+            .hero .hero-img img {
+                width: 100%;
+            }
+    }
+
+</style>
+
+
 <!-- Icon Cards-->
 <div class="container">
     <a href="#"><img class="d-block w-100" src="~/images/Iklan_Eno.svg" alt="First slide"></a>
@@ -24,9 +150,35 @@
 
 </div>
 
+<section id="hero" class="hero d-flex align-items-center">
+
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-6 d-flex flex-column justify-content-center">
+                <h1 data-aos="fade-up">Helping you buy the best product for your business</h1>
+                <h4 data-aos="fade-up" data-aos-delay="400">We can help you to find the best product to buy based on your transaction history</h4>
+                <div data-aos="fade-up" data-aos-delay="600">
+                    <div class="text-lg-start">
+                        <a href="#recSys" class="btn-get-started scrollto d-inline-flex align-items-center justify-content-center align-self-center">
+                            <span>Get Started</span>
+                            <i class="fas fa-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6 hero-img" data-aos="zoom-out" data-aos-delay="200">
+                <img src="~/images/SideMenu.svg" class="img-fluid" alt="">
+            </div>
+        </div>
+    </div>
+
+</section><!-- End Hero -->
 
 
-<div class="container">
+
+
+
+<div class="container" id="recSys">
 
     @if (TempData["MessageFailed"] != null)
     {
@@ -38,8 +190,8 @@
     }
     <div class="card-body">
         <form method="post">
-            <h2 class="font-weight-bold my-3">Recommendation for you</h2>
-            <div class="form-row align-items-end">
+            <h2 class="font-weight-bold my-3" data-aos="fade-up">Recommendation for you</h2>
+            <div class="form-row align-items-end" data-aos="fade-up">
                 <div class="form-group col-sm-3">
                     <label class="control-label" for="SubmissionDateFrom">Recommendation Date:</label>
                     <input id="searchDatePick" class="form-control w-100" type="text" placeholder="Choose Date" asp-for="@Model.recommendationDate" required autocomplete="off" />
@@ -53,7 +205,7 @@
         <!--Card-->
         @if (Model.outRecommendationList != null)
         {
-            <div class="table">
+            <div class="table" data-aos="fade-up">
                 <table id="tableRec" class="table table-hover table-bordered mb-3" width="100%" cellspacing="0">
                     <thead>
                         <tr>
@@ -81,7 +233,7 @@
             </div>
             <!-- card end-->
 
-            <div class="table">
+            <div class="table" data-aos="fade-up">
                 <h2 class="font-weight-bold my-3">Transaction History:</h2>
                 <h3>@Model.historyInfo</h3>
                 <table id="tableHistory" class="table table-hover table-bordered" width="100%" cellspacing="0">
@@ -118,12 +270,38 @@
 
 
         }
+                    @if (TempData["NoData"].ToString() == "true")
+            {
+                <div class="w-100 d-flex justify-content-center" data-aos="fade-up">
+                    <img id="imgNoData" style="width:40%" src="~/images/no-data-fp.jpg">
+                </div>
+
+                <style>
+                    @@media screen and (max-width: 600px) {
+                        #imgNoData {
+                            min-width: 100%;
+                        }
+                    }
+                </style>
+
+            }
 
     </div>
 </div>
 
 
 <script>
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+
+        document.querySelector(this.getAttribute('href')).scrollIntoView({
+            behavior: 'smooth'
+        });
+    });
+});
+
      $(document).ready(function(){
 
     $("#searchDatePick").datepicker({
@@ -143,7 +321,6 @@
        });
 
     });
-
 
 
 </script>

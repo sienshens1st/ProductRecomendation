@@ -63,6 +63,11 @@
     <!-- Favicon, Put your Website Logo Here (square resolution and png)-->
     <link rel="shortcut icon" type="image/png" href="/potionLib/img/icon.png" />
 
+
+    @*aos cdn*@
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+
     <style>
         span.select2-selection__rendered {
             white-space: nowrap;
@@ -231,6 +236,13 @@
     <!--Select 2-->
     <script>
         $(document).ready(function() {
+            AOS.init({
+              duration: 1000,
+              easing: "ease-in-out",
+              once: true,
+              mirror: false
+            });
+
             $('.js-example-basic-multiple').select2();
             $(".js-example-basic-single").select2();
 

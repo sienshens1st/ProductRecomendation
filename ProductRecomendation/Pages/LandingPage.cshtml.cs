@@ -52,14 +52,15 @@ namespace ProductRecomendation.Pages
 
         public void OnGet()
         {
+            TempData["NoData"] = "true";
             var role = User.Claims.FirstOrDefault(c => c.Type == "role")?.Value;
             if (role == "admin" || role == "salesman")
             {
                 Response.Redirect("MainMenu");
                 return;
             }
-
             string rayon = HttpContext.User.Claims.FirstOrDefault(x => x.Type == "rayon_exp_code").Value;
+            
 
         }
 
@@ -73,6 +74,7 @@ namespace ProductRecomendation.Pages
             if (!isDataExist)
             {
                 TempData["MessageFailed"] = "Data Transaction didn't exist.";
+                TempData["NoData"] = "true";
                 return;
             }
 
@@ -80,6 +82,7 @@ namespace ProductRecomendation.Pages
             if (result.IsSuccessful != true)
             {
                 TempData["MessageFailed"] = result.Content;
+                TempData["NoData"] = "true";
                 return;
             }
 
@@ -101,6 +104,7 @@ namespace ProductRecomendation.Pages
             if (result2.IsSuccessful != true)
             {
                 TempData["MessageFailed"] = result2.Content;
+                TempData["NoData"] = "true";
                 return;
             }
 
@@ -136,7 +140,8 @@ namespace ProductRecomendation.Pages
 
             var month = CultureInfo.InvariantCulture.DateTimeFormat.GetMonthName(splitmonth);
             var year = recommendationDate.Split('-')[1];
-            historyInfo = String.Format("25 {0} {1} - 25 {0} {2} ", month, int.Parse(year)-1 ,year); 
+            historyInfo = String.Format("25 {0} {1} - 25 {0} {2} ", month, int.Parse(year)-1 ,year);
+            TempData["NoData"] = "false";
 
         }
 
