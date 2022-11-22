@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -19,17 +20,25 @@ namespace ProductRecomendation
 {
     public class Startup
     {
+        public IConfiguration Configuration { get; }
+
+        public static IConfiguration _configuration = null;
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
+            _configuration = configuration;
         }
 
-        public IConfiguration Configuration { get; }
-
-        // This method gets called by the runtime. Use this method to add services to the container.tes
+        // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddRazorPages();
+
+            services.AddRazorPages(options => {
+                options.Conventions.AuthorizeFolder("/");
+                options.Conventions.AllowAnonymousToPage("/Index");
+                options.Conventions.AllowAnonymousToPage("/Error");
+                options.Conventions.AllowAnonymousToPage("/Logout");
+            });
 
             services.AddControllersWithViews(x => x.SuppressAsyncSuffixInActionNames = false)
             .AddRazorRuntimeCompilation();
@@ -37,6 +46,16 @@ namespace ProductRecomendation
             services.AddDbContext<ApplicationDbContext>(options =>
                         options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
 
+
+
+            services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+                .AddCookie(option => {
+                    option.ExpireTimeSpan = TimeSpan.FromHours(23);
+                    option.SlidingExpiration = true;
+                    option.LoginPath = "/Index";
+                    option.LogoutPath = "/Logout";
+                    option.AccessDeniedPath = new PathString("/Error401");
+                });
 
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 
@@ -70,6 +89,8 @@ namespace ProductRecomendation
             app.UseHttpsRedirection();
             app.UseStaticFiles();
 
+            app.UseAuthentication();
+
             app.UseRouting();
 
             app.UseAuthorization();
@@ -77,6 +98,7 @@ namespace ProductRecomendation
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapRazorPages();
+                endpoints.MapControllers();
             });
         }
     }

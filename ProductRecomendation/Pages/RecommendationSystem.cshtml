@@ -1,0 +1,278 @@
+﻿@page
+@model ProductRecomendation.Pages.RecommendationSystemModel
+@{
+    ViewData["Title"] = "Recommendation System";
+}
+
+<!-- Breadcrumbs -->
+<ol class="breadcrumb">
+    <li class="breadcrumb-item font-weight-bold">
+        Recommendation System
+    </li>
+</ol>
+
+<!-- Content -->
+<div class="card">
+    <div class="card-body">
+
+        <div class="card-title row mb-2">
+            <div class="col float-left">
+                <h1 class="bd-title montserrat font-weight-bold mb-2" id="content">Recommendation System</h1>
+            </div>
+            <div class="col float-right">
+                <button type="button" class="btn btn-secondary float-right text-white" data-toggle="collapse" data-target="#collapseExample" aria-expanded="false" aria-controls="collapseExample"><i class="fas fa-filter mr-1" style="color:white"></i>Filter</button>
+            </div>
+        </div>
+
+
+        @if (TempData["MessageFailed"] != null)
+        {
+            <div class="alert alert-warning mt-2 alert-dismissible fade show" role="alert" id="alertFailedTemp">
+                <button type="button" class="close" data-dismiss="alert">&times;</button>
+                <i class="fas fa-fw fa-solid fa-exclamation-triangle"></i> @TempData["MessageFailed"]
+            </div>
+
+        }
+
+        <div class="" id="collapseExample">
+            <form method="post">
+                <div class="form-row align-items-end">
+                    <div class="form-group col-sm-3">
+                        <label class="control-label" for="SubmissionDateFrom">Recommendation Date:</label>
+                        <input id="searchDatePick" class="form-control w-100" type="text" placeholder="Choose Date" autocomplete="off" asp-for="Input.recommendationDate" required />
+                    </div>
+                    <div class="form-group col-sm-3">
+                        <label class="mb-2" for="Role">Customer:</label>
+                        <select id="shiptoCode" class="js-example-basic-single form-control" style="width: 100%" asp-for="Input.customerShipTo" required>
+                            @if (Model.DdlCustomer != null)
+                            {
+                                foreach (var item in Model.DdlCustomer)
+                                {
+                                    <option value="@item.username">@item.username - @item.rayon_exp_code</option>
+                                }
+                            }
+                        </select>
+                    </div>
+                    <div class="form-group col-sm-3 d-flex align-items-end">
+                        <button type="submit" class="btn btn-light btn-block text-dark">Search</button>
+                    </div>
+
+                </div>
+            </form>
+        </div>
+
+        @if (Model.isSearched == true)
+        {
+            <form method="post" asp-page-handler="Export" id="formExport">
+                <div class="float-right mb-3" id="btnExportId">
+                    <input type="hidden" asp-for="@Model.Input.recommendationDate" name="recDate" />
+                    <input type="hidden" asp-for="@Model.Input.customerShipTo" name="shipTo" />
+                    <button type="submit" class="btn btn-success text-white" form="formExport">Export Excel</button>
+                </div>
+            </form>
+        }
+
+
+        <!--Card-->
+        <div class="table-responsive">
+            <table id="tableRec" class="table table-hover" width="100%" cellspacing="0">
+                <thead>
+                    <tr>
+                        <th width="50px">No</th>
+                        <th>Item Code</th>
+                        <th>Item Name</th>
+
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.outRecommendationList != null)
+                    {
+                        int index = 1;
+                        foreach (var item in Model.outRecommendationList)
+                        {
+                            <tr>
+                                <td>@index</td>
+                                <td>@item.item_code</td>
+                                <td>@item.item_desc</td>
+                            </tr>
+                            index++;
+                        }
+                    }
+                    @*                    <tr>
+                        <td>HCO01</td>
+                        <td>Hyro Coco 330 ml</td>
+                        </tr>
+                        <tr>
+                        <td>HCO04</td>
+                        <td>Hyro Coco 450 ml</td>
+                        </tr>
+                        <tr>
+                        <td>ZGVIT</td>
+                        <td>Zee Sachets 10s</td>
+                        </tr>
+                        <tr>
+                        <td>PN09V</td>
+                        <td>Promag 15 ml Sachets 10s</td>
+                        </tr>*@
+                    @*                    @if (Model.payablesReturnData != null)
+                        {
+                        foreach (var item in Model.payablesReturnData)
+                        {
+                        <tr>
+                        <td>@item.invoiceNumber</td>
+                        <td>@item.invoiceDate</td>
+                        <td>@item.invoiceDueDate</td>
+                        <td class="text-right">@string.Format("Rp {0:#,0.00}",@item.invoiceAmount)</td>
+                        <td class="text-right">@(item.invoiceInstallment == 0 ? "-" : string.Format("Rp{0:#,0.00}",@item.invoiceInstallment))</td>
+                        <td class="text-right">@string.Format("Rp {0:#,0.00}",@item.invoiceOutstanding)</td>
+                        </tr>
+                        }
+
+                        }*@
+                </tbody>
+                @*                @if (Model.isFilter == true)
+                    {
+                    <tfoot>
+                    <tr>
+                    <th>Total</th>
+                    <th></th>
+                    <th></th>
+                    <th class="text-right">@(Model.grandTotalInvoiceAmount == 0 ? '-' : string.Format("Rp {0:#,0.00}",@Model.grandTotalInvoiceAmount))</th>
+                    <th class="text-right">@(Model.grandTotalInvoiceInstallment == 0 ? '-' : string.Format("Rp {0:#,0.00}",@Model.grandTotalInvoiceInstallment))</th>
+                    <th class="text-right">@(Model.grandTotalInvoiceOutstanding == 0 ? '-' : string.Format("Rp {0:#,0.00}",@Model.grandTotalInvoiceOutstanding))</th>
+                    </tr>
+                    </tfoot>
+                    }*@
+
+            </table>
+        </div>
+        <!-- card end-->
+
+
+
+
+
+
+    </div>
+</div>
+
+
+
+<script>
+       $(document).ready(function(){
+
+      $("#searchDatePick").datepicker({
+         format: "mm-yyyy",
+         startView: "months",
+         endDate: '+1m',
+         minViewMode: "months",
+         autoclose:true
+      });
+
+
+
+
+
+            var project_name = "test123a";
+            var project_start ="test123a";
+            var project_end = "test123a";
+            var project_cab = "test123a";
+
+
+        $.fn.dataTable.ext.buttons.excelBt = {
+                extend: 'excelHtml5',
+                text: '<span style="" class="popup" data-popuptext="I am a CSS-only popup!">Export to Excel</span>',
+                title: '',
+                message: '',
+                messageBottom: '',
+                dom: 'Bfrtip',
+                className: "btn btn-primary mb-2",
+                filename: project_name,
+                init: function (api, node, config) {
+                    $(node).removeClass('dt-button')
+                },
+                customize: function (xlsx) {
+                    console.log("tes");
+                    var sheet = xlsx.xl.worksheets['sheet1.xml'];
+                    var numrows = 9;
+                    var clR = $('row', sheet);
+                    var col = $('col', sheet);
+                    $(col[0], sheet).attr('width', 30);
+
+                    //update Row
+                    clR.each(function () {
+                        var attr = $(this).attr('r');
+                        var ind = parseInt(attr);
+                        ind = ind + numrows;
+                        $(this).attr("r", ind);
+                    });
+
+                    // Create row before data
+                    $('row c ', sheet).each(function () {
+                        var attr = $(this).attr('r');
+                        var pre = attr.substring(0, 1);
+                        var ind = parseInt(attr.substring(1, attr.length));
+                        ind = ind + numrows;
+                        $(this).attr("r", pre + ind);
+                    });
+
+                    function Addrow(index, data) {
+                        msg = '<row r="' + index + '">'
+                        for (i = 0; i < data.length; i++) {
+                            var key = data[i].key;
+                            var value = data[i].value;
+                            msg += '<c t="inlineStr" r="' + key + index + '">';
+                            msg += '<is>';
+                            msg += '<t>' + value + '</t>';
+                            msg += '</is>';
+                            msg += '</c>';
+                        }
+                        msg += '</row>';
+                        return msg;
+                    }
+
+
+                    //insert
+                    var r1 = Addrow(1, [{ key: 'A', value: 'LAPORAN HASIL CYCLE COUNT' }]);
+                    var rEnseval = Addrow(2, [{ key: 'A', value: 'Enseval Putera Megatrading' }]);
+                    var r2 = Addrow(3, [{ key: 'A', value: 'CABANG ' + project_cab }]);
+                    var r3 = Addrow(6, [{ key: 'A', value: 'Cycle Count' }, { key: 'B', value: ': ' + project_name }]);
+                    var r4 = Addrow(7, [{ key: 'A', value: 'START' }, { key: 'B', value: ': ' + project_start }]);
+                    var rFinish = Addrow(8, [{ key: 'A', value: 'FINISH' }, { key: 'B', value: ': ' + project_end }]);
+                    //var r5 = Addrow(parseInt(project_row) + numrows + 4, [{ key: 'A', value: 'Dengan ini,' }]);
+                    //var r6 = Addrow(parseInt(project_row) + numrows + 5, [{ key: 'A', value: 'kami mengajukan hasil Stok Opname diatas, untuk selanjutnya diproses menjadi adjustment.' }]);
+                    //var r7 = Addrow(parseInt(project_row) + numrows + 7, [{ key: 'A', value: 'Ka. Gud.' }, { key: 'I', value: 'Menyetujui,' }]);
+                    //var r8 = Addrow(parseInt(project_row) + numrows + 8, [{ key: 'I', value: 'Accounting.' }]);
+                    //var r9 = Addrow(parseInt(project_row) + numrows + 12, [{ key: 'A', value: '( . . . . . . . . . . . . . . . . . . . . )' }, { key: 'I', value: '( . . . . . . . . . . . . . . . . . . . . )' }]);
+
+                    sheet.childNodes[0].childNodes[1].innerHTML = r1 + rEnseval + r2 + r3 + r4 + rFinish + sheet.childNodes[0].childNodes[1].innerHTML;
+                }
+            };
+
+
+
+
+        $("#tableRec").DataTable({
+    //    buttons: [
+    //        'excelBt'
+    //    ],
+    //    language: {
+    //        searchPlaceholder: "Search",
+    //        search: "<i class='fas fa-fw fa-search'></i>",
+    //        searchClass: "form-control"
+    //    }
+    //}).buttons().container().appendTo("#x");
+
+    });
+     });
+
+
+    //function checkUploadDatePick(arg){
+    //    if(arg.value.length == 0){
+    //        $('#btnUploadTransaction').attr('disabled', 'disabled');
+    //    }else{
+    //        $('#btnUploadTransaction').removeAttr("disabled");
+    //    }
+    //}
+
+</script>
