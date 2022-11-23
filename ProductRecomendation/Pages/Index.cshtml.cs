@@ -1,3 +1,5 @@
+using egitlab_PotionNetCore.Data;
+using egitlab_PotionNetCore.Pages;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Http;
@@ -34,6 +36,9 @@ namespace ProductRecomendation.Pages
 
         [BindProperty]
         public LoginModel Input { get; set; }
+
+        UrlString conf = new UrlString();
+        Helper helper = new Helper();
 
         public void OnGet()
         {
@@ -72,7 +77,11 @@ namespace ProductRecomendation.Pages
                 TempData["MessageFailed"] = "User is not active. Please contact admin.";
                 return;
             }
-            if(user.password != password.Trim())
+
+            string encryptedPassword = helper.EncryptString(conf.KeyEncrpyt, password.Trim());
+
+
+            if(user.password != encryptedPassword)
             {
                 TempData["MessageFailed"] = "The password you entered is incorrect. Please try again.";
                 return;

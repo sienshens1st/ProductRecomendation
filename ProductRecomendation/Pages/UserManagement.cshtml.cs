@@ -1,3 +1,5 @@
+using egitlab_PotionNetCore.Data;
+using egitlab_PotionNetCore.Pages;
 using egitlab_PotionNetCore.Security;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -29,6 +31,10 @@ namespace ProductRecomendation.Pages
 
         public IList<tb_user> tb_Users { get; set; }
 
+
+        UrlString conf = new UrlString();
+        Helper helper = new Helper();
+
         public async Task OnGet()
         {
             await loadUsers();
@@ -56,6 +62,7 @@ namespace ProductRecomendation.Pages
                 InputAddUser.flag_active = "Y";
                 InputAddUser.lastupdate_by = HttpContext.User.Claims.FirstOrDefault(x => x.Type == "username").Value;
                 InputAddUser.lastupdate_date = DateTime.Now;
+                InputAddUser.password = helper.EncryptString(conf.KeyEncrpyt, InputAddUser.password.Trim());
 
                 _context.tb_user.Add(InputAddUser);
                 _context.SaveChanges();
@@ -82,7 +89,7 @@ namespace ProductRecomendation.Pages
                 }
 
                 user.username = InputEditUser.username;
-                user.password = InputEditUser.password;
+                user.password = helper.EncryptString(conf.KeyEncrpyt, InputEditUser.password.Trim()); 
                 user.rayon_exp_code = InputEditUser.rayon_exp_code;
                 user.role_id = InputEditUser.role_id;
                 user.flag_active = "Y";
