@@ -40,8 +40,17 @@ namespace ProductRecomendation.Pages
         {
             public string item_code { get; set; }
             public string item_desc { get; set; }
+            public string flag_active { get;set; }
         }
-        
+
+        public class ListExport
+        {
+            public string item_code { get; set; }
+            public string item_desc { get; set; }
+        }
+
+
+
 
 
         [BindProperty]
@@ -112,8 +121,13 @@ namespace ProductRecomendation.Pages
 
             foreach (var item in listResult)
             {
-                var itemName = _context.tb_product.Where(x => x.item_code == item).FirstOrDefault().item_desc.ToString();
-                outRecommendationList.Add(new OutputRecommendation { item_code = item, item_desc = itemName });
+                var itemDb = _context.tb_product.Where(x => x.item_code == item).FirstOrDefault();
+
+                if (itemDb.flag_active == "N") continue;
+
+                outRecommendationList.Add(new OutputRecommendation { item_code = item, item_desc = itemDb.item_desc, flag_active = itemDb.flag_active  });
+
+                if (outRecommendationList.Count == 10) break;
             };
 
             Console.Write(outRecommendationList);
@@ -157,13 +171,19 @@ namespace ProductRecomendation.Pages
 
             outRecommendationList = new List<OutputRecommendation>();
             var listResult = JsonConvert.DeserializeObject<IList<string>>(result.Content);
+            var listExport = new List<ListExport>();
 
             foreach (var item in listResult)
             {
-                var itemName = _context.tb_product.Where(x => x.item_code == item).FirstOrDefault().item_desc.ToString();
-                outRecommendationList.Add(new OutputRecommendation { item_code = item, item_desc = itemName });
-            };
+                var itemDb = _context.tb_product.Where(x => x.item_code == item).FirstOrDefault();
 
+                if (itemDb.flag_active == "N") continue;
+
+                listExport.Add(new ListExport { item_code = item, item_desc = itemDb.item_desc });
+
+
+                if (listExport.Count == 10) break;
+            };
 
 
 
@@ -181,7 +201,7 @@ namespace ProductRecomendation.Pages
                 ws.Cell(4, 1).Style.Font.Bold = true;
                 ws.Cell(4, 2).Value = "ITEM DESCRIPTION";
                 ws.Cell(4, 2).Style.Font.Bold = true;
-                ws.Cell(5, 1).InsertData(outRecommendationList);
+                ws.Cell(5, 1).InsertData(listExport);
                 ws.Columns().AdjustToContents();
 
                 using (MemoryStream MyMemoryStream = new MemoryStream())

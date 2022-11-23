@@ -27,6 +27,7 @@ namespace ProductRecomendation.Pages
         {
             public string item_code { get; set; }
             public string item_desc { get; set; }
+            public string flag_active { get; set; }
         }
 
         public class TransactionHistory
@@ -91,8 +92,13 @@ namespace ProductRecomendation.Pages
 
             foreach (var item in listResult)
             {
-                var itemName = _context.tb_product.Where(x => x.item_code == item).FirstOrDefault().item_desc.ToString();
-                outRecommendationList.Add(new OutputRecommendation { item_code = item, item_desc = itemName });
+                var itemDb = _context.tb_product.Where(x => x.item_code == item).FirstOrDefault();
+
+                if (itemDb.flag_active == "N") continue;
+
+                outRecommendationList.Add(new OutputRecommendation { item_code = item, item_desc = itemDb.item_desc, flag_active = itemDb.flag_active });
+
+                if (outRecommendationList.Count == 10) break;
             };
 
             Console.Write(outRecommendationList);
