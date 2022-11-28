@@ -55,7 +55,7 @@
                 </tr>
             </thead>
             <tbody>
-                @foreach (var item in Model.tb_Users)
+                @foreach (var item in Model.tb_UsersViewModel)
                 {
                     <tr>
 
@@ -63,7 +63,7 @@
                         <td>@item.rayon_exp_code</td>
                         <td>@(item.role_id == 1 ? "Admin": (item.role_id == 2 ? "Salesman": "Customer"))</td>
                         <td class="@(item.flag_active =="Y" ? "text-success" : "text-danger")"> @(item.flag_active =="Y" ? "Active" : "Inactive")</td>
-                         <td>@(item.lastupdate_by)</td>
+                        <td>@(item.lastupdate_by)</td>
                         <td>@item.lastupdate_date.ToString("d MMM yyyy HH:mm:ss")</td>
                         <td>
                             @if (item.flag_active == "Y")
@@ -116,7 +116,15 @@
                     </div>
                     <div class="form-group">
                         <label for="RayonCode">Rayon Code <span class="text-danger">*</span></label>
-                        <input type="text" class="form-control" id="txtRayonCode" placeholder="Rayon Code" asp-for="InputAddUser.rayon_exp_code" required>
+                        <select id="ddlRayonCode" class="js-example-basic-single form-control" style="width: 100%" asp-for="InputAddUser.rayon_exp_id" required>
+                            @if (Model.DdlRayon != null)
+                            {
+                                foreach (var item in Model.DdlRayon)
+                                {
+                                    <option value="@item.rayon_exp_id">@item.rayon_exp_code</option>
+                                }
+                            }
+                        </select>
                     </div>
                     <div class="form-group">
                         <label for="User Type">User Type</label>
@@ -156,11 +164,19 @@
                     </div>
                     <div class="form-group">
                         <label for="Password">Password</label>
-                        <input type="password" class="form-control" id="txtPasswordEdit" placeholder="Password" asp-for="InputEditUser.password" >
+                        <input type="password" class="form-control" id="txtPasswordEdit" placeholder="Password" asp-for="InputEditUser.password">
                     </div>
                     <div class="form-group">
                         <label for="RayonCode">Rayon Code <span class="text-danger">*</span></label>
-                        <input type="text" class="form-control" id="txtRayonCodeEdit" placeholder="Rayon Code" asp-for="InputEditUser.rayon_exp_code" required>
+                        <select id="ddlRayonCodeEdit" class="js-example-basic-single form-control" style="width: 100%" asp-for="InputEditUser.rayon_exp_id" required>
+                            @if (Model.DdlRayon != null)
+                            {
+                                foreach (var item in Model.DdlRayon)
+                                {
+                                    <option value="@item.rayon_exp_id">@item.rayon_exp_code</option>
+                                }
+                            }
+                        </select>
                     </div>
                     <div class="form-group">
                         <label for="User Type">User Type</label>
@@ -237,7 +253,15 @@
 
 
     $(document).ready(function () {
-        $('.select2').select2();
+        $("#ddlRayonCode").select2({
+            dropdownParent: $("#AddUser")
+          });
+
+          $("#ddlRayonCodeEdit").select2({
+            dropdownParent: $("#EditUser")
+          });
+
+
     });
 
     function activateUser(user_id) {
@@ -252,7 +276,7 @@
     $("#hdnUserId_Edit").val(item_row["user_id"]);
     $("#txtUsernameEdit").val(item_row["username"]);
     //$("#txtPasswordEdit").val(item_row["password"]);
-    $("#txtRayonCodeEdit").val(item_row["rayon_exp_code"]);
+    $("#ddlRayonCodeEdit").val(item_row["rayon_exp_code"]);
     $("#txtRoleIdEdit").val(item_row["role_id"]);
 
     }

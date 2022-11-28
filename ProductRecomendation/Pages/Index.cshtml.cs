@@ -89,11 +89,13 @@ namespace ProductRecomendation.Pages
 
 
             var roleName = _context.tb_role.Where(x => x.role_id == user.role_id).FirstOrDefault().role_name.ToString();
+            var rayon_exp_code = _context.tb_rayon.Where(x => x.rayon_exp_id == int.Parse(user.rayon_exp_id)).Select(x => x.rayon_exp_code).FirstOrDefault();
 
             var claims = new List<Claim>
                         {
                             new Claim("username", user.username),
-                            new Claim("rayon_exp_code",user.rayon_exp_code.ToString()),
+                            new Claim("rayon_exp_id",user.rayon_exp_id.ToString()),
+                            new Claim("rayon_exp_code",rayon_exp_code.ToString()),
                             new Claim("role",roleName),
                             new Claim("roleId",user.role_id.ToString()),
                         };

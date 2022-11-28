@@ -19,5 +19,6 @@ namespace ProductRecomendation.Data
         public DbSet<tb_role> tb_role { get; set; }
         public DbSet<tb_product> tb_product { get; set; }
         public DbSet<tb_transaction> tb_transaction { get; set; }
+        public DbSet<tb_rayon> tb_rayon { get; set; }
     }
 }

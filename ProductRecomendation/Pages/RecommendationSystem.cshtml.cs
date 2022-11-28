@@ -17,7 +17,7 @@ using System.Threading.Tasks;
 
 namespace ProductRecomendation.Pages
 {
-    [AuthorizeCustom(Role.admin,Role.salesman)]
+    [AuthorizeCustom(Role.admin, Role.salesman)]
     public class RecommendationSystemModel : PageModel
     {
 
@@ -40,7 +40,7 @@ namespace ProductRecomendation.Pages
         {
             public string item_code { get; set; }
             public string item_desc { get; set; }
-            public string flag_active { get;set; }
+            public string flag_active { get; set; }
         }
 
         public class ListExport
@@ -49,44 +49,86 @@ namespace ProductRecomendation.Pages
             public string item_desc { get; set; }
         }
 
+        public class userViewModel
+        {
+            public int user_id { get; set; }
+            public int role_id { get; set; }
+            public string username { get; set; }
 
+            public string password { get; set; }
+
+            public string rayon_exp_id { get; set; }
+            public string flag_active { get; set; }
+
+            public string lastupdate_by { get; set; }
+
+            public DateTime lastupdate_date { get; set; }
+
+            public string rayon_exp_code { get; set; }
+        }
 
 
 
         [BindProperty]
         public InputRec Input { get; set; }
 
-        public IList<tb_user> DdlCustomer { get; set; }
+        public IList<userViewModel> DdlCustomer { get; set; }
 
         public IList<OutputRecommendation> outRecommendationList { get; set; }
+
 
         public bool isSearched = false;
 
         UrlString conf = new UrlString();
         public async Task OnGetAsync()
         {
-            DdlCustomer = new List<tb_user>();
+            DdlCustomer = new List<userViewModel>();
             string role = HttpContext.User.Claims.FirstOrDefault(x => x.Type == "role").Value;
-            string rayon = HttpContext.User.Claims.FirstOrDefault(x => x.Type == "rayon_exp_code").Value;
+            string rayon_id = HttpContext.User.Claims.FirstOrDefault(x => x.Type == "rayon_exp_id").Value;
 
-            await loadDdlCustomer(role, rayon);
-                
+            await loadDdlCustomer(role, rayon_id);
+
         }
 
 
-        public async Task loadDdlCustomer(string role, string rayon)
+        public async Task loadDdlCustomer(string role, string rayon_id)
         {
-            if(role == "admin")
+
+            if (role == "admin")
             {
-                var customers = await _context.tb_user.Where(x => x.role_id == 3).ToListAsync();
-                DdlCustomer = customers;
+                var joineddata = await _context.tb_user.Where(x => x.role_id == 3).Select(x => new userViewModel
+                {
+                    user_id = x.user_id,
+                    role_id = x.role_id,
+                    username = x.username,
+                    password = x.password,
+                    rayon_exp_id = x.rayon_exp_id,
+                    flag_active = x.flag_active,
+                    lastupdate_by = x.lastupdate_by,
+                    lastupdate_date = x.lastupdate_date,
+                    rayon_exp_code = _context.tb_rayon.FirstOrDefault(y => y.rayon_exp_id.ToString() == x.rayon_exp_id).rayon_exp_code
+                }).ToListAsync();
+
+                DdlCustomer = joineddata;
             }
             else
             {
-                var customers = await _context.tb_user.Where(x => x.rayon_exp_code == rayon && x.role_id == 3).ToListAsync();
-                DdlCustomer = customers;
+
+                var joineddata = await _context.tb_user.Where(x => x.rayon_exp_id == rayon_id && x.role_id == 3).Select(x => new userViewModel
+                {
+                    user_id = x.user_id,
+                    role_id = x.role_id,
+                    username = x.username,
+                    password = x.password,
+                    rayon_exp_id = x.rayon_exp_id,
+                    flag_active = x.flag_active,
+                    lastupdate_by = x.lastupdate_by,
+                    lastupdate_date = x.lastupdate_date,
+                    rayon_exp_code = _context.tb_rayon.FirstOrDefault(y => y.rayon_exp_id.ToString() == x.rayon_exp_id).rayon_exp_code
+                }).ToListAsync();
+                DdlCustomer = joineddata;
             }
-           
+
         }
 
 
@@ -99,7 +141,7 @@ namespace ProductRecomendation.Pages
             string pickedDate = Input.recommendationDate;
             string pickedUser = Input.customerShipTo;
 
-            bool isDataExist = _context.tb_transaction.Where(x=> x.transaction_date == pickedDate).Any();
+            bool isDataExist = _context.tb_transaction.Where(x => x.transaction_date == pickedDate).Any();
 
             if (!isDataExist)
             {
@@ -108,7 +150,7 @@ namespace ProductRecomendation.Pages
                 return;
             }
 
-            var result = await getRecommendation(pickedDate,pickedUser);
+            var result = await getRecommendation(pickedDate, pickedUser);
             if (result.IsSuccessful != true)
             {
                 TempData["MessageFailed"] = result.Content;
@@ -125,7 +167,7 @@ namespace ProductRecomendation.Pages
 
                 if (itemDb.flag_active == "N") continue;
 
-                outRecommendationList.Add(new OutputRecommendation { item_code = item, item_desc = itemDb.item_desc, flag_active = itemDb.flag_active  });
+                outRecommendationList.Add(new OutputRecommendation { item_code = item, item_desc = itemDb.item_desc, flag_active = itemDb.flag_active });
 
                 if (outRecommendationList.Count == 10) break;
             };
@@ -195,7 +237,7 @@ namespace ProductRecomendation.Pages
                 ws.Cell(1, 2).Value = pickedUser;
                 ws.Cell(2, 1).Value = "Recommendation for:";
                 ws.Cell(2, 2).DataType = XLDataType.Text;
-                ws.Cell(2, 2).Value = "'"+ month + " - " + pickedDate.Split('-')[1];
+                ws.Cell(2, 2).Value = "'" + month + " - " + pickedDate.Split('-')[1];
 
                 ws.Cell(4, 1).Value = "ITEM CODE";
                 ws.Cell(4, 1).Style.Font.Bold = true;
@@ -216,7 +258,7 @@ namespace ProductRecomendation.Pages
 
         public async Task<IRestResponse> getRecommendation(string filename, string customer)
         {
-            var client = new RestClient(conf.PythonApiUrl + "/Recommendation/?filename=" + filename+ "&&customerShipTo=" + customer);
+            var client = new RestClient(conf.PythonApiUrl + "/Recommendation/?filename=" + filename + "&&customerShipTo=" + customer);
             var request = new RestRequest(Method.GET);
             request.AddHeader("Content-Type", "application/json");
             IRestResponse response = await client.ExecuteAsync(request);

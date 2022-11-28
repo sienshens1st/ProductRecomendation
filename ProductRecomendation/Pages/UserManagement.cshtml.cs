@@ -10,6 +10,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using static ProductRecomendation.Pages.RecommendationSystemModel;
 
 namespace ProductRecomendation.Pages
 {
@@ -29,7 +30,10 @@ namespace ProductRecomendation.Pages
         [BindProperty]
         public tb_user InputEditUser { get; set; }
 
-        public IList<tb_user> tb_Users { get; set; }
+        public IList<userViewModel> tb_UsersViewModel { get; set; }
+
+        public IList<tb_rayon> DdlRayon { get; set; }
+
 
 
         UrlString conf = new UrlString();
@@ -37,14 +41,40 @@ namespace ProductRecomendation.Pages
 
         public async Task OnGet()
         {
+            DdlRayon = new List<tb_rayon>();
+            loadDdlRayon();
             await loadUsers();
+            
         }
+
+
+        public void loadDdlRayon()
+        {
+            var list = _context.tb_rayon.Where(x => x.flag_active == "Y").ToList();
+            DdlRayon = list;
+
+        }
+
+
+
 
         private async Task loadUsers()
         {
-            var users = _context.tb_user.ToListAsync();
+            var joineddata = await _context.tb_user.Select(x => new userViewModel
+            {
+                user_id = x.user_id,
+                role_id = x.role_id,
+                username = x.username,
+                password = x.password,
+                rayon_exp_id = x.rayon_exp_id,
+                flag_active = x.flag_active,
+                lastupdate_by = x.lastupdate_by,
+                lastupdate_date = x.lastupdate_date,
+                rayon_exp_code = _context.tb_rayon.FirstOrDefault(y => y.rayon_exp_id.ToString() == x.rayon_exp_id).rayon_exp_code
+            }).ToListAsync();
 
-            tb_Users = await users;
+
+            tb_UsersViewModel = joineddata;
         }
 
 
@@ -90,7 +120,7 @@ namespace ProductRecomendation.Pages
 
                 user.username = InputEditUser.username;
                 user.password = helper.EncryptString(conf.KeyEncrpyt, InputEditUser.password.Trim()); 
-                user.rayon_exp_code = InputEditUser.rayon_exp_code;
+                user.rayon_exp_id = InputEditUser.rayon_exp_id;
                 user.role_id = InputEditUser.role_id;
                 user.flag_active = "Y";
                 user.lastupdate_by = HttpContext.User.Claims.FirstOrDefault(x => x.Type == "username").Value;
