@@ -136,7 +136,7 @@ namespace ProductRecomendation.Pages
         {
 
             string role = HttpContext.User.Claims.FirstOrDefault(x => x.Type == "role").Value;
-            string rayon = HttpContext.User.Claims.FirstOrDefault(x => x.Type == "rayon_exp_code").Value;
+            string rayon = HttpContext.User.Claims.FirstOrDefault(x => x.Type == "rayon_exp_id").Value;
 
             string pickedDate = Input.recommendationDate;
             string pickedUser = Input.customerShipTo;
@@ -182,7 +182,7 @@ namespace ProductRecomendation.Pages
         public async Task<IActionResult> OnPostExportAsync(string recDate, string shipTo)
         {
             string role = HttpContext.User.Claims.FirstOrDefault(x => x.Type == "role").Value;
-            string rayon = HttpContext.User.Claims.FirstOrDefault(x => x.Type == "rayon_exp_code").Value;
+            string rayon = HttpContext.User.Claims.FirstOrDefault(x => x.Type == "rayon_exp_id").Value;
 
             string pickedDate = recDate;
             string pickedUser = shipTo;
