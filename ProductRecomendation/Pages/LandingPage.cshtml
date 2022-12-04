@@ -1,4 +1,5 @@
 ﻿@page
+@inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor;
 @model ProductRecomendation.Pages.LandingPageModel
 @{
     ViewData["Title"] = "Enseval Product Recommendation";
@@ -25,8 +26,8 @@
 <style>
 
     /*--------------------------------------------------------------
-    # Hero Section
-    --------------------------------------------------------------*/
+            # Hero Section
+            --------------------------------------------------------------*/
 
     .hero:before {
         content: "";
@@ -50,7 +51,7 @@
         width: 100%;
         height: 80vh;
         /*  background: url(/images/landingpage/hero-bg.png) top center no-repeat;
-      background-size: cover;*/
+              background-size: cover;*/
     }
 
         .hero h1 {
@@ -205,7 +206,24 @@
         <!--Card-->
         @if (Model.outRecommendationList != null)
         {
+
+
+
+
             <div class="table" data-aos="fade-up">
+
+                <div class="float-right mb-3" id="btnExportId">
+                    <a href="/LandingPage?q=@Model.recommendationDate&&a=@HttpContextAccessor.HttpContext.User.Claims.FirstOrDefault(c => c.Type == "username").Value" class="btn btn-primary text-black" target="_blank">Export Pdf</a>
+                </div>
+
+                <form method="post" asp-page-handler="ExportExcel" id="formExportExcel">
+                    <div class="float-right mb-3 mr-2" id="btnExportId">
+                        <input type="hidden" asp-for="@Model.recommendationDate" name="recDate" />
+                        <input type="hidden" asp-for="@HttpContextAccessor.HttpContext.User.Claims.FirstOrDefault(c => c.Type == "username").Value" name="shipTo" />
+                        <button type="submit" class="btn btn-success text-white" form="formExportExcel">Export Excel</button>
+                    </div>
+                </form>
+
                 <table id="tableRec" class="table table-hover table-bordered mb-3" width="100%" cellspacing="0">
                     <thead>
                         <tr>
@@ -270,21 +288,21 @@
 
 
         }
-                    @if (TempData["NoData"].ToString() == "true")
-            {
-                <div class="w-100 d-flex justify-content-center" data-aos="fade-up">
-                    <img id="imgNoData" style="width:40%" src="~/images/no-data-fp.jpg">
-                </div>
+        @if (TempData["NoData"].ToString() == "true")
+        {
+            <div class="w-100 d-flex justify-content-center" data-aos="fade-up">
+                <img id="imgNoData" style="width:40%" src="~/images/no-data-fp.jpg">
+            </div>
 
-                <style>
-                    @@media screen and (max-width: 600px) {
-                        #imgNoData {
-                            min-width: 100%;
-                        }
+            <style>
+                @@media screen and (max-width: 600px) {
+                    #imgNoData {
+                        min-width: 100%;
                     }
-                </style>
+                }
+            </style>
 
-            }
+        }
 
     </div>
 </div>
@@ -293,32 +311,32 @@
 <script>
 
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-    anchor.addEventListener('click', function (e) {
-        e.preventDefault();
+        anchor.addEventListener('click', function (e) {
+            e.preventDefault();
 
-        document.querySelector(this.getAttribute('href')).scrollIntoView({
-            behavior: 'smooth'
+            document.querySelector(this.getAttribute('href')).scrollIntoView({
+                behavior: 'smooth'
+            });
         });
     });
-});
 
-     $(document).ready(function(){
+    $(document).ready(function () {
 
-    $("#searchDatePick").datepicker({
-       format: "mm-yyyy",
-       startView: "months",
-       endDate: '+1m',
-       minViewMode: "months",
-       autoclose:true
-    });
+        $("#searchDatePick").datepicker({
+            format: "mm-yyyy",
+            startView: "months",
+            endDate: '+1m',
+            minViewMode: "months",
+            autoclose: true
+        });
 
-       $("#tableRec").DataTable({
-        paging: false,
-        info: false,
-       });
+        $("#tableRec").DataTable({
+            paging: false,
+            info: false,
+        });
 
         $("#tableHistory").DataTable({
-       });
+        });
 
     });
 

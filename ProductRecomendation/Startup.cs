@@ -1,3 +1,5 @@
+using DinkToPdf.Contracts;
+using DinkToPdf;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -32,6 +34,7 @@ namespace ProductRecomendation
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddSingleton(typeof(IConverter), new SynchronizedConverter(new PdfTools()));
 
             services.AddRazorPages(options => {
                 options.Conventions.AuthorizeFolder("/");
@@ -87,6 +90,7 @@ namespace ProductRecomendation
             }
 
             app.UseHttpsRedirection();
+
             app.UseStaticFiles();
 
             app.UseAuthentication();

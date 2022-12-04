@@ -1,6 +1,12 @@
 using ClosedXML.Excel;
+using CsvHelper.TypeConversion;
+using DinkToPdf;
+using DinkToPdf.Contracts;
+using DocumentFormat.OpenXml.Drawing.Charts;
+using egitlab_PotionNetCore.Data;
 using egitlab_PotionNetCore.Pages;
 using egitlab_PotionNetCore.Security;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
@@ -10,10 +16,15 @@ using ProductRecomendation.Models;
 using RestSharp;
 using System;
 using System.Collections.Generic;
+using System.Drawing.Imaging;
+using System.Drawing.Printing;
 using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using ColorMode = DinkToPdf.ColorMode;
+using Orientation = DinkToPdf.Orientation;
+using PaperKind = DinkToPdf.PaperKind;
 
 namespace ProductRecomendation.Pages
 {
@@ -23,10 +34,14 @@ namespace ProductRecomendation.Pages
 
 
         private readonly ApplicationDbContext _context;
+        private readonly IWebHostEnvironment _webHostEnv;
+        private readonly IConverter _converter;
 
-        public RecommendationSystemModel(ApplicationDbContext context)
+        public RecommendationSystemModel(ApplicationDbContext context, IConverter converter, IWebHostEnvironment webHostEnv)
         {
             _context = context;
+            _converter = converter;
+            _webHostEnv = webHostEnv;
         }
 
 
@@ -80,13 +95,33 @@ namespace ProductRecomendation.Pages
         public bool isSearched = false;
 
         UrlString conf = new UrlString();
-        public async Task OnGetAsync()
+        public async Task<IActionResult> OnGetAsync(string q, string a)
         {
-            DdlCustomer = new List<userViewModel>();
-            string role = HttpContext.User.Claims.FirstOrDefault(x => x.Type == "role").Value;
-            string rayon_id = HttpContext.User.Claims.FirstOrDefault(x => x.Type == "rayon_exp_id").Value;
+            try
+            {
+                DdlCustomer = new List<userViewModel>();
+                string role = HttpContext.User.Claims.FirstOrDefault(x => x.Type == "role").Value;
+                string rayon_id = HttpContext.User.Claims.FirstOrDefault(x => x.Type == "rayon_exp_id").Value;
 
-            await loadDdlCustomer(role, rayon_id);
+                await loadDdlCustomer(role, rayon_id);
+
+                if (!String.IsNullOrEmpty(q) && !String.IsNullOrEmpty(a))
+                {
+                    if (TempData["jsonExportContent"] == null) return Page();
+
+
+                    byte[] file = ExportPdf(q, a);
+                    return File(file, "application/pdf");
+                }
+
+                return Page();
+            }
+            catch(Exception ex)
+            {
+                TempData["MessageFailed"] = ex.Message;
+                return Page();
+            }
+
 
         }
 
@@ -161,6 +196,9 @@ namespace ProductRecomendation.Pages
             outRecommendationList = new List<OutputRecommendation>();
             var listResult = JsonConvert.DeserializeObject<IList<string>>(result.Content);
 
+            TempData["jsonExportContent"] = result.Content;
+            TempData.Keep("jsonExportContent");
+
             foreach (var item in listResult)
             {
                 var itemDb = _context.tb_product.Where(x => x.item_code == item).FirstOrDefault();
@@ -179,40 +217,13 @@ namespace ProductRecomendation.Pages
         }
 
 
-        public async Task<IActionResult> OnPostExportAsync(string recDate, string shipTo)
+        public byte[] ExportPdf(string recDate, string shipTo)
         {
-            string role = HttpContext.User.Claims.FirstOrDefault(x => x.Type == "role").Value;
-            string rayon = HttpContext.User.Claims.FirstOrDefault(x => x.Type == "rayon_exp_id").Value;
-
-            string pickedDate = recDate;
-            string pickedUser = shipTo;
-
-            int splitmonth = int.Parse(pickedDate.Split('-')[0]);
-
+            int splitmonth = int.Parse(recDate.Split('-')[0]);
             var month = CultureInfo.InvariantCulture.DateTimeFormat.GetMonthName(splitmonth);
 
-            var filename = pickedUser + "_" + month + "_Recommendation.xlsx";
-
-
-            bool isDataExist = _context.tb_transaction.Where(x => x.transaction_date == pickedDate).Any();
-
-            if (!isDataExist)
-            {
-                TempData["MessageFailed"] = "Data Transaction didn't exist.";
-                await loadDdlCustomer(role, rayon);
-                return Page();
-            }
-
-            var result = await getRecommendation(pickedDate, pickedUser);
-            if (result.IsSuccessful != true)
-            {
-                TempData["MessageFailed"] = result.Content;
-                await loadDdlCustomer(role, rayon);
-                return Page();
-            }
-
-            outRecommendationList = new List<OutputRecommendation>();
-            var listResult = JsonConvert.DeserializeObject<IList<string>>(result.Content);
+            var listResult = JsonConvert.DeserializeObject<IList<string>>(TempData["jsonExportContent"].ToString());
+            TempData.Keep("jsonExportContent");
             var listExport = new List<ListExport>();
 
             foreach (var item in listResult)
@@ -228,6 +239,66 @@ namespace ProductRecomendation.Pages
             };
 
 
+
+            var path = _webHostEnv.WebRootPath;
+
+            var globalSettings = new GlobalSettings
+            {
+                ColorMode = ColorMode.Color,
+                Orientation = Orientation.Portrait,
+                PaperSize = PaperKind.A4,
+                Margins = new MarginSettings { Top = 10 },
+                DocumentTitle = shipTo + " " + month + " Recommendation",
+            };
+
+            var objectSettings = new ObjectSettings
+            {
+                PagesCount = true,
+                HtmlContent = PdfHtmlGenerator.GetHtmlString(listExport, path, shipTo, recDate),
+                WebSettings = { DefaultEncoding = "utf-8", UserStyleSheet = Path.Combine(Directory.GetCurrentDirectory(), "Assets", "styles.css") },
+                FooterSettings = { Right = "Page [page] of [toPage]", FontSize = 7 },
+
+            };
+            var pdf = new HtmlToPdfDocument()
+            {
+                GlobalSettings = globalSettings,
+                Objects = { objectSettings }
+            };
+
+
+            var file = _converter.Convert(pdf);
+
+            return file;
+        }
+
+            public IActionResult OnPostExportExcel(string recDate, string shipTo)
+        {
+            //List<ListExport> listExport = await getListExportRecSysAsync(recDate, shipTo);
+
+
+            var listResult = JsonConvert.DeserializeObject<IList<string>>(TempData["jsonExportContent"].ToString());
+            TempData.Keep("jsonExportContent");
+            var listExport = new List<ListExport>();
+
+            foreach (var item in listResult)
+            {
+                var itemDb = _context.tb_product.Where(x => x.item_code == item).FirstOrDefault();
+
+                if (itemDb.flag_active == "N") continue;
+
+                listExport.Add(new ListExport { item_code = item, item_desc = itemDb.item_desc });
+
+
+                if (listExport.Count == 10) break;
+            };
+
+
+            string pickedDate = recDate;
+            string pickedUser = shipTo; 
+
+            int splitmonth = int.Parse(pickedDate.Split('-')[0]);
+            var month = CultureInfo.InvariantCulture.DateTimeFormat.GetMonthName(splitmonth);
+            var filename = pickedUser + "_" + month + "_Recommendation.xlsx";
 
             using (XLWorkbook wb = new XLWorkbook())
             {
@@ -255,6 +326,42 @@ namespace ProductRecomendation.Pages
             }
 
         }
+
+
+
+        public async Task<List<ListExport>> getListExportRecSysAsync(string recDate, string shipTo)
+        {
+            string role = HttpContext.User.Claims.FirstOrDefault(x => x.Type == "role").Value;
+            string rayon = HttpContext.User.Claims.FirstOrDefault(x => x.Type == "rayon_exp_id").Value;
+
+            var pickedDate = recDate;
+            var pickedUser = shipTo;
+
+
+            var result = await getRecommendation(pickedDate, pickedUser);
+
+            outRecommendationList = new List<OutputRecommendation>();
+            var listResult = JsonConvert.DeserializeObject<IList<string>>(result.Content);
+            var listExport = new List<ListExport>();
+
+            foreach (var item in listResult)
+            {
+                var itemDb = _context.tb_product.Where(x => x.item_code == item).FirstOrDefault();
+
+                if (itemDb.flag_active == "N") continue;
+
+                listExport.Add(new ListExport { item_code = item, item_desc = itemDb.item_desc });
+
+
+                if (listExport.Count == 10) break;
+            };
+
+
+            return listExport;
+
+        }
+
+
 
         public async Task<IRestResponse> getRecommendation(string filename, string customer)
         {

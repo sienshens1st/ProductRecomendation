@@ -63,13 +63,18 @@
 
         @if (Model.isSearched == true)
         {
-            <form method="post" asp-page-handler="Export" id="formExport">
                 <div class="float-right mb-3" id="btnExportId">
+                    <a href="/RecommendationSystem?q=@Model.Input.recommendationDate&&a=@Model.Input.customerShipTo" class="btn btn-primary text-black" target="_blank">Export Pdf</a>
+                </div>
+
+            <form method="post" asp-page-handler="ExportExcel" id="formExportExcel">
+                <div class="float-right mb-3 mr-2" id="btnExportId">
                     <input type="hidden" asp-for="@Model.Input.recommendationDate" name="recDate" />
                     <input type="hidden" asp-for="@Model.Input.customerShipTo" name="shipTo" />
-                    <button type="submit" class="btn btn-success text-white" form="formExport">Export Excel</button>
+                    <button type="submit" class="btn btn-success text-white" form="formExportExcel">Export Excel</button>
                 </div>
             </form>
+
         }
 
 

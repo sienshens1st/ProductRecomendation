@@ -1,3 +1,7 @@
+using ClosedXML.Excel;
+using DinkToPdf.Contracts;
+using DinkToPdf;
+using egitlab_PotionNetCore.Data;
 using egitlab_PotionNetCore.Pages;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -7,20 +11,29 @@ using RestSharp;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using static ProductRecomendation.Pages.RecommendationSystemModel;
+using Microsoft.AspNetCore.Hosting;
 
 namespace ProductRecomendation.Pages
 {
     public class LandingPageModel : PageModel
     {
 
-        private readonly ApplicationDbContext _context;
 
-        public LandingPageModel(ApplicationDbContext context)
+        private readonly ApplicationDbContext _context;
+        private readonly IWebHostEnvironment _webHostEnv;
+        private readonly IConverter _converter;
+
+        public LandingPageModel(ApplicationDbContext context, IConverter converter, IWebHostEnvironment webHostEnv)
         {
             _context = context;
+            _converter = converter;
+            _webHostEnv = webHostEnv;
         }
+
 
 
         public class OutputRecommendation
@@ -51,17 +64,37 @@ namespace ProductRecomendation.Pages
         [BindProperty]
         public string recommendationDate { get; set; }
 
-        public void OnGet()
+        public IActionResult OnGet(string q, string a)
         {
-            TempData["NoData"] = "true";
-            var role = User.Claims.FirstOrDefault(c => c.Type == "role")?.Value;
-            if (role == "admin" || role == "salesman")
+            try
             {
-                Response.Redirect("MainMenu");
-                return;
+                TempData["NoData"] = "true";
+                var role = User.Claims.FirstOrDefault(c => c.Type == "role")?.Value;
+
+                if (role == "admin" || role == "salesman")
+                {
+                    return RedirectToPage("/MainMenu");
+                }
+
+                string rayon = HttpContext.User.Claims.FirstOrDefault(x => x.Type == "rayon_exp_code").Value;
+
+                if (!String.IsNullOrEmpty(q) && !String.IsNullOrEmpty(a))
+                {
+                    if (TempData["jsonExportContent"] == null) return Page();
+
+
+                    byte[] file = ExportPdf(q, a);
+                    return File(file, "application/pdf");
+                }
+
+                return Page();
+
             }
-            string rayon = HttpContext.User.Claims.FirstOrDefault(x => x.Type == "rayon_exp_code").Value;
-            
+            catch (Exception ex)
+            {
+                TempData["MessageFailed"] = ex.Message;
+                return Page();
+            }
 
         }
 
@@ -101,12 +134,13 @@ namespace ProductRecomendation.Pages
                 if (outRecommendationList.Count == 10) break;
             };
 
-            Console.Write(outRecommendationList);
+            TempData["jsonExportContent"] = result.Content;
+            TempData.Keep("jsonExportContent");
 
 
             //get transaction history
 
-             var result2 = await getTransactionHistory(recommendationDate, username);
+            var result2 = await getTransactionHistory(recommendationDate, username);
             if (result2.IsSuccessful != true)
             {
                 TempData["MessageFailed"] = result2.Content;
@@ -124,8 +158,9 @@ namespace ProductRecomendation.Pages
                 var trans_date_parsed = DateTime.ParseExact(item.TRX_DATE, "MM/dd/yyyy",
                                        System.Globalization.CultureInfo.InvariantCulture).ToString("dd-MMM-yyyy");
                 var itemName = _context.tb_product.Where(x => x.item_code == item.ITEM_CODE).FirstOrDefault().item_desc.ToString();
-                outTransactionHistoryList.Add(new TransactionHistory { 
-                    ITEM_CODE = item.ITEM_CODE, 
+                outTransactionHistoryList.Add(new TransactionHistory
+                {
+                    ITEM_CODE = item.ITEM_CODE,
                     ITEM_NAME = itemName,
                     SALES_QTY = item.SALES_QTY,
                     GROSS_SALES_AMOUNT = grossvalue.Remove(grossvalue.Length - 1),
@@ -139,17 +174,167 @@ namespace ProductRecomendation.Pages
             {
                 splitmonth = 12;
             }
-            else {
+            else
+            {
                 splitmonth = int.Parse(recommendationDate.Split('-')[0]) - 1;
             };
-        
+
 
             var month = CultureInfo.InvariantCulture.DateTimeFormat.GetMonthName(splitmonth);
             var year = recommendationDate.Split('-')[1];
-            historyInfo = String.Format("25 {0} {1} - 25 {0} {2} ", month, int.Parse(year)-1 ,year);
+            historyInfo = String.Format("25 {0} {1} - 25 {0} {2} ", month, int.Parse(year) - 1, year);
             TempData["NoData"] = "false";
 
         }
+
+
+
+
+
+        public byte[] ExportPdf(string recDate, string shipTo)
+        {
+            int splitmonth = int.Parse(recDate.Split('-')[0]);
+            var month = CultureInfo.InvariantCulture.DateTimeFormat.GetMonthName(splitmonth);
+
+            var listResult = JsonConvert.DeserializeObject<IList<string>>(TempData["jsonExportContent"].ToString());
+            TempData.Keep("jsonExportContent");
+            var listExport = new List<ListExport>();
+
+            foreach (var item in listResult)
+            {
+                var itemDb = _context.tb_product.Where(x => x.item_code == item).FirstOrDefault();
+
+                if (itemDb.flag_active == "N") continue;
+
+                listExport.Add(new ListExport { item_code = item, item_desc = itemDb.item_desc });
+
+
+                if (listExport.Count == 10) break;
+            };
+
+
+
+            var path = _webHostEnv.WebRootPath;
+
+            var globalSettings = new GlobalSettings
+            {
+                ColorMode = ColorMode.Color,
+                Orientation = Orientation.Portrait,
+                PaperSize = PaperKind.A4,
+                Margins = new MarginSettings { Top = 10 },
+                DocumentTitle = shipTo + " " + month + " Recommendation",
+            };
+
+            var objectSettings = new ObjectSettings
+            {
+                PagesCount = true,
+                HtmlContent = PdfHtmlGenerator.GetHtmlString(listExport, path, shipTo, recDate),
+                WebSettings = { DefaultEncoding = "utf-8", UserStyleSheet = Path.Combine(Directory.GetCurrentDirectory(), "Assets", "styles.css") },
+                FooterSettings = { Right = "Page [page] of [toPage]", FontSize = 7 },
+
+            };
+            var pdf = new HtmlToPdfDocument()
+            {
+                GlobalSettings = globalSettings,
+                Objects = { objectSettings }
+            };
+
+
+            var file = _converter.Convert(pdf);
+
+            return file;
+        }
+
+        public IActionResult OnPostExportExcel(string recDate, string shipTo)
+        {
+            //List<ListExport> listExport = await getListExportRecSysAsync(recDate, shipTo);
+
+
+            var listResult = JsonConvert.DeserializeObject<IList<string>>(TempData["jsonExportContent"].ToString());
+            TempData.Keep("jsonExportContent");
+            var listExport = new List<ListExport>();
+
+            foreach (var item in listResult)
+            {
+                var itemDb = _context.tb_product.Where(x => x.item_code == item).FirstOrDefault();
+
+                if (itemDb.flag_active == "N") continue;
+
+                listExport.Add(new ListExport { item_code = item, item_desc = itemDb.item_desc });
+
+
+                if (listExport.Count == 10) break;
+            };
+
+
+            string pickedDate = recDate;
+            string pickedUser = shipTo;
+
+            int splitmonth = int.Parse(pickedDate.Split('-')[0]);
+            var month = CultureInfo.InvariantCulture.DateTimeFormat.GetMonthName(splitmonth);
+            var filename = pickedUser + "_" + month + "_Recommendation.xlsx";
+
+            using (XLWorkbook wb = new XLWorkbook())
+            {
+                var ws = wb.Worksheets.Add("Recommendation");
+                ws.Columns().AdjustToContents();
+                ws.Cell(1, 1).Value = "Customer:";
+                ws.Cell(1, 2).Value = pickedUser;
+                ws.Cell(2, 1).Value = "Recommendation for:";
+                ws.Cell(2, 2).DataType = XLDataType.Text;
+                ws.Cell(2, 2).Value = "'" + month + " - " + pickedDate.Split('-')[1];
+
+                ws.Cell(4, 1).Value = "ITEM CODE";
+                ws.Cell(4, 1).Style.Font.Bold = true;
+                ws.Cell(4, 2).Value = "ITEM DESCRIPTION";
+                ws.Cell(4, 2).Style.Font.Bold = true;
+                ws.Cell(5, 1).InsertData(listExport);
+                ws.Columns().AdjustToContents();
+
+                using (MemoryStream MyMemoryStream = new MemoryStream())
+                {
+                    wb.SaveAs(MyMemoryStream);
+                    return File(MyMemoryStream.ToArray(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", filename);
+                }
+            }
+
+        }
+
+
+
+        public async Task<List<ListExport>> getListExportRecSysAsync(string recDate, string shipTo)
+        {
+            string role = HttpContext.User.Claims.FirstOrDefault(x => x.Type == "role").Value;
+            string rayon = HttpContext.User.Claims.FirstOrDefault(x => x.Type == "rayon_exp_id").Value;
+
+            var pickedDate = recDate;
+            var pickedUser = shipTo;
+
+
+            var result = await getRecommendation(pickedDate, pickedUser);
+
+            outRecommendationList = new List<OutputRecommendation>();
+            var listResult = JsonConvert.DeserializeObject<IList<string>>(result.Content);
+            var listExport = new List<ListExport>();
+
+            foreach (var item in listResult)
+            {
+                var itemDb = _context.tb_product.Where(x => x.item_code == item).FirstOrDefault();
+
+                if (itemDb.flag_active == "N") continue;
+
+                listExport.Add(new ListExport { item_code = item, item_desc = itemDb.item_desc });
+
+
+                if (listExport.Count == 10) break;
+            };
+
+
+            return listExport;
+
+        }
+
+
 
 
 
