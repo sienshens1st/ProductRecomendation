@@ -19,6 +19,14 @@
             <div class="col float-left">
                 <h1 class="bd-title montserrat font-weight-bold mb-2" id="content">Transaction</h1>
             </div>
+
+            <div class="col float-right">
+                <div class="btn float-right">
+                    <a class="btn btn-success btn-block text-white float-right text-center" style="white-space:nowrap;" asp-page-handler="DownloadTemplate" id="btnDownloadTemplate">Download Template</a>
+                </div>
+                
+
+            </div>
         </div>
 
 
@@ -58,7 +66,7 @@
                 </div>
             </div>
         </div>
-       
+
         <!--card upload done-->
         <!--Card-->
         <div class="card">
@@ -82,7 +90,7 @@
                     </tbody>
                 </table>
             </div>
-                
+
         </div>
         <!-- card table end-->
     </div>
@@ -124,72 +132,72 @@
 
 
 <script>
-     $(document).ready(function(){
-         $("#tableUploaded").DataTable({
-                "ordering": false
-            });
+    $(document).ready(function () {
+        $("#tableUploaded").DataTable({
+            "ordering": false
+        });
 
-      $("#uploadDatePick").datepicker({
-         format: "mm-yyyy",
-         startView: "months",
-         endDate: '+1m',
-         minViewMode: "months",
-         autoclose:true
-      });
+        $("#uploadDatePick").datepicker({
+            format: "mm-yyyy",
+            startView: "months",
+            endDate: '+1m',
+            minViewMode: "months",
+            autoclose: true
+        });
     });
 
 
-       function btnConfirmationClick(){
-           if($("#fileInput")[0].files.length == 0){
-               $("#labelFile").show();
-           }else{
-              $("#labelFile").hide();
-              $("#btnUploadTemplateAdmin").hide();
-              $("#labelConfirmation").show();
-              $("#btnConfirmationCancel").show();
-              $("#btnUpload").show();
-           }
-       }
+    function btnConfirmationClick() {
+        if ($("#fileInput")[0].files.length == 0) {
+            $("#labelFile").show();
+        } else {
+            $("#labelFile").hide();
+            $("#btnUploadTemplateAdmin").hide();
+            $("#labelConfirmation").show();
+            $("#btnConfirmationCancel").show();
+            $("#btnUpload").show();
+        }
+    }
 
 
-           //validasi tipe input file admin
-         var _validFileExtensions = [".csv"];
-        function fileValidationUpload(data) {
-            var fileInputHtml = $("#fileInput");
-            for (var i = 0; i < fileInputHtml.length; i++) {
-                var Input = fileInputHtml[i];
-                if (Input.type == "file") {
-                    var sFileName = Input.value;
-                    if (sFileName.length > 0) {
-                        var blnValid = false;
-                        for (var j = 0; j < _validFileExtensions.length; j++) {
-                            var sCurExtension = _validFileExtensions[j];
-                            if (sFileName.substr(sFileName.length - sCurExtension.length, sCurExtension.length).toLowerCase() == sCurExtension.toLowerCase()) {
-                                blnValid = true;
-                                break;
-                            }
+    //validasi tipe input file admin
+    var _validFileExtensions = [".csv"];
+    function fileValidationUpload(data) {
+        var fileInputHtml = $("#fileInput");
+        for (var i = 0; i < fileInputHtml.length; i++) {
+            var Input = fileInputHtml[i];
+            if (Input.type == "file") {
+                var sFileName = Input.value;
+                if (sFileName.length > 0) {
+                    var blnValid = false;
+                    for (var j = 0; j < _validFileExtensions.length; j++) {
+                        var sCurExtension = _validFileExtensions[j];
+                        if (sFileName.substr(sFileName.length - sCurExtension.length, sCurExtension.length).toLowerCase() == sCurExtension.toLowerCase()) {
+                            blnValid = true;
+                            break;
                         }
+                    }
 
-                        if (!blnValid) {
-                            fileInputHtml.val("");
-                            alert("You can only upload .csv files.");
-                        }
+                    if (!blnValid) {
+                        fileInputHtml.val("");
+                        alert("You can only upload .csv files.");
                     }
                 }
             }
-        }//end function filevalidation
-
-        function bindTranscationDate(){
-           $("#hdnTranscationDate").val($("#uploadDatePick").val());
         }
+    }//end function filevalidation
 
-        function checkUploadDatePick(arg){
-            if(arg.value.length == 0){
-                $('#btnUploadTransaction').attr('disabled', 'disabled');
-            }else{
-                 $('#btnUploadTransaction').removeAttr("disabled");
-            }
+    function bindTranscationDate() {
+        $("#hdnTranscationDate").val($("#uploadDatePick").val());
+    }
+
+    function checkUploadDatePick(arg) {
+        if (arg.value.length == 0) {
+            $('#btnUploadTransaction').attr('disabled', 'disabled');
+        } else {
+            $('#btnUploadTransaction').removeAttr("disabled");
         }
+    }
 
 </script>
 

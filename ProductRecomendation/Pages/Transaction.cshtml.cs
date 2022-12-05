@@ -159,6 +159,44 @@ namespace ProductRecomendation.Pages
             }
         }
 
+
+        public IActionResult OnGetDownloadTemplate()
+        {
+
+
+            try
+            {
+                string filename = "Template Upload Transaction.csv";
+                byte[] b = System.IO.File.ReadAllBytes("D:\\User\\Desktop\\Program Skripsi Dennis\\API\\Files\\" + filename);
+
+                var file = new FileContentResult(b, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+                file.FileDownloadName = "Template Upload Transaction.csv";
+
+                return file;
+
+            }
+            catch (Exception ex)
+            {
+                if (ex.Message.Contains("Could not find file"))
+                {
+                    TempData["MessageFailed"] = "Please Upload RMA Template by Admin!";
+                }
+                else
+                {
+                    TempData["MessageFailed"] = ex.Message;
+                }
+                return RedirectToPage();
+            }
+
+
+
+        }
+
+
+
+
+
+
     }//end class
 
 
