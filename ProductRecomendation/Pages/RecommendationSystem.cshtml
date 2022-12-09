@@ -64,14 +64,14 @@
         @if (Model.isSearched == true)
         {
                 <div class="float-right mb-3" id="btnExportId">
-                    <a href="/RecommendationSystem?q=@Model.Input.recommendationDate&&a=@Model.Input.customerShipTo" class="btn btn-primary text-black" target="_blank">Export Pdf</a>
+                    <a href="/RecommendationSystem?q=@Model.Input.recommendationDate&&a=@Model.Input.customerShipTo" class="btn btn-primary text-black" target="_blank">Report Pdf</a>
                 </div>
 
             <form method="post" asp-page-handler="ExportExcel" id="formExportExcel">
                 <div class="float-right mb-3 mr-2" id="btnExportId">
                     <input type="hidden" asp-for="@Model.Input.recommendationDate" name="recDate" />
                     <input type="hidden" asp-for="@Model.Input.customerShipTo" name="shipTo" />
-                    <button type="submit" class="btn btn-success text-white" form="formExportExcel">Export Excel</button>
+                    <button type="submit" class="btn btn-success text-white" form="formExportExcel">Report Excel</button>
                 </div>
             </form>
 
@@ -186,7 +186,7 @@
 
         $.fn.dataTable.ext.buttons.excelBt = {
                 extend: 'excelHtml5',
-                text: '<span style="" class="popup" data-popuptext="I am a CSS-only popup!">Export to Excel</span>',
+                text: '<span style="" class="popup" data-popuptext="I am a CSS-only popup!">Report Excel</span>',
                 title: '',
                 message: '',
                 messageBottom: '',

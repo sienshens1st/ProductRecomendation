@@ -213,14 +213,14 @@
             <div class="table" data-aos="fade-up">
 
                 <div class="float-right mb-3" id="btnExportId">
-                    <a href="/LandingPage?q=@Model.recommendationDate&&a=@HttpContextAccessor.HttpContext.User.Claims.FirstOrDefault(c => c.Type == "username").Value" class="btn btn-primary text-black" target="_blank">Export Pdf</a>
+                    <a href="/LandingPage?q=@Model.recommendationDate&&a=@HttpContextAccessor.HttpContext.User.Claims.FirstOrDefault(c => c.Type == "username").Value" class="btn btn-primary text-black" target="_blank">Report Pdf</a>
                 </div>
 
                 <form method="post" asp-page-handler="ExportExcel" id="formExportExcel">
                     <div class="float-right mb-3 mr-2" id="btnExportId">
                         <input type="hidden" asp-for="@Model.recommendationDate" name="recDate" />
                         <input type="hidden" asp-for="@HttpContextAccessor.HttpContext.User.Claims.FirstOrDefault(c => c.Type == "username").Value" name="shipTo" />
-                        <button type="submit" class="btn btn-success text-white" form="formExportExcel">Export Excel</button>
+                        <button type="submit" class="btn btn-success text-white" form="formExportExcel">Report Excel</button>
                     </div>
                 </form>
 
