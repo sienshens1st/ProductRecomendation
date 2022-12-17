@@ -38,9 +38,11 @@ namespace ProductRecomendation
 
             services.AddRazorPages(options => {
                 options.Conventions.AuthorizeFolder("/");
-                options.Conventions.AllowAnonymousToPage("/Index");
+                options.Conventions.AllowAnonymousToPage("/Login");
                 options.Conventions.AllowAnonymousToPage("/Error");
+                options.Conventions.AllowAnonymousToPage("/LandingPage");
                 options.Conventions.AllowAnonymousToPage("/Logout");
+                options.Conventions.AddPageRoute("/LandingPage", "");
             });
 
             services.AddControllersWithViews(x => x.SuppressAsyncSuffixInActionNames = false)
@@ -55,7 +57,7 @@ namespace ProductRecomendation
                 .AddCookie(option => {
                     option.ExpireTimeSpan = TimeSpan.FromHours(23);
                     option.SlidingExpiration = true;
-                    option.LoginPath = "/Index";
+                    option.LoginPath = "/Login";
                     option.LogoutPath = "/Logout";
                     option.AccessDeniedPath = new PathString("/Error401");
                 });
@@ -104,6 +106,9 @@ namespace ProductRecomendation
                 endpoints.MapRazorPages();
                 endpoints.MapControllers();
             });
+
+
+
         }
     }
 }

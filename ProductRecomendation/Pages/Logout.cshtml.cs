@@ -13,7 +13,7 @@ namespace egitlab_PotionNetCore.Pages
    
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
 
-            return RedirectToPage("/Index");
+            return RedirectToPage("/Login");
         }
     }
 }

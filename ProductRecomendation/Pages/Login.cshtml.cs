@@ -14,20 +14,20 @@ using System.Security.Claims;
 
 namespace ProductRecomendation.Pages
 {
-    public class IndexModel : PageModel
+    public class LoginModel : PageModel
     {
         private readonly ApplicationDbContext _context;
         private readonly IHttpContextAccessor _httpContext;
 
 
-        public IndexModel(ApplicationDbContext context, IHttpContextAccessor httpContext)
+        public LoginModel(ApplicationDbContext context, IHttpContextAccessor httpContext)
         {
             _context = context;
             _httpContext = httpContext;
         }
 
 
-        public class LoginModel
+        public class LoginModelInput
         {
             public string username { get; set; }
             public string password { get; set; }
@@ -35,7 +35,7 @@ namespace ProductRecomendation.Pages
 
 
         [BindProperty]
-        public LoginModel Input { get; set; }
+        public LoginModelInput Input { get; set; }
 
         UrlString conf = new UrlString();
         Helper helper = new Helper();

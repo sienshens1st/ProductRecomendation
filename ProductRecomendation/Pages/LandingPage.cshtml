@@ -26,8 +26,8 @@
 <style>
 
     /*--------------------------------------------------------------
-            # Hero Section
-            --------------------------------------------------------------*/
+                        # Hero Section
+                        --------------------------------------------------------------*/
 
     .hero:before {
         content: "";
@@ -51,7 +51,7 @@
         width: 100%;
         height: 80vh;
         /*  background: url(/images/landingpage/hero-bg.png) top center no-repeat;
-              background-size: cover;*/
+                          background-size: cover;*/
     }
 
         .hero h1 {
@@ -160,10 +160,33 @@
                 <h4 data-aos="fade-up" data-aos-delay="400">We can help you to find the best product to buy based on your transaction history</h4>
                 <div data-aos="fade-up" data-aos-delay="600">
                     <div class="text-lg-start">
-                        <a href="#recSys" class="btn-get-started scrollto d-inline-flex align-items-center justify-content-center align-self-center">
-                            <span>Get Started</span>
-                            <i class="fas fa-arrow-right"></i>
-                        </a>
+                        @if (User.Claims.FirstOrDefault(c => c.Type == "role")?.Value == "admin" || User.Claims.FirstOrDefault(c => c.Type == "role")?.Value == "salesman")
+                        {
+                            <a href="/MainMenu" class="btn-get-started scrollto d-inline-flex align-items-center justify-content-center align-self-center">
+                                <span>Get Started</span>
+                                <i class="fas fa-arrow-right"></i>
+                            </a>
+                        }
+                        else 
+                        {
+                            if(User.Claims.FirstOrDefault(c => c.Type == "username")?.Value == null){
+                                    <a href="/Logout" class="btn-get-started scrollto d-inline-flex align-items-center justify-content-center align-self-center">
+                                <span>Get Started</span>
+                                <i class="fas fa-arrow-right"></i>
+                            </a>
+                            }
+                            else
+                            {
+                                <a href="#recSys" class="btn-get-started scrollto d-inline-flex align-items-center justify-content-center align-self-center">
+                                    <span>Get Started</span>
+                                    <i class="fas fa-arrow-right"></i>
+                                </a>
+                            }
+
+                        
+                        }
+
+
                     </div>
                 </div>
             </div>
@@ -179,133 +202,140 @@
 
 
 
-<div class="container" id="recSys">
 
-    @if (TempData["MessageFailed"] != null)
-    {
-        <div class="alert alert-warning mt-2 alert-dismissible fade show" role="alert" id="alertFailedTemp">
-            <button type="button" class="close" data-dismiss="alert">&times;</button>
-            <i class="fas fa-fw fa-solid fa-exclamation-triangle"></i> @TempData["MessageFailed"]
-        </div>
+@if (User.Claims.FirstOrDefault(c => c.Type == "role")?.Value == "customer")
+{
+    <div class="container" id="recSys">
 
-    }
-    <div class="card-body">
-        <form method="post">
-            <h2 class="font-weight-bold my-3" data-aos="fade-up">Recommendation for you</h2>
-            <div class="form-row align-items-end" data-aos="fade-up">
-                <div class="form-group col-sm-3">
-                    <label class="control-label" for="SubmissionDateFrom">Recommendation Date:</label>
-                    <input id="searchDatePick" class="form-control w-100" type="text" placeholder="Choose Date" asp-for="@Model.recommendationDate" required autocomplete="off" />
-                </div>
-                <div class="form-group col-sm-3 d-flex align-items-end">
-                    <button type="submit" class="btn btn-success btn-light btn-block text-dark">Search</button>
-                </div>
-
-            </div>
-        </form>
-        <!--Card-->
-        @if (Model.outRecommendationList != null)
+        @if (TempData["MessageFailed"] != null)
         {
+            <div class="alert alert-warning mt-2 alert-dismissible fade show" role="alert" id="alertFailedTemp">
+                <button type="button" class="close" data-dismiss="alert">&times;</button>
+                <i class="fas fa-fw fa-solid fa-exclamation-triangle"></i> @TempData["MessageFailed"]
+            </div>
 
-
-
-
-            <div class="table" data-aos="fade-up">
-
-                <div class="float-right mb-3" id="btnExportId">
-                    <a href="/LandingPage?q=@Model.recommendationDate&&a=@HttpContextAccessor.HttpContext.User.Claims.FirstOrDefault(c => c.Type == "username").Value" class="btn btn-primary text-black" target="_blank">Report Pdf</a>
-                </div>
-
-                <form method="post" asp-page-handler="ExportExcel" id="formExportExcel">
-                    <div class="float-right mb-3 mr-2" id="btnExportId">
-                        <input type="hidden" asp-for="@Model.recommendationDate" name="recDate" />
-                        <input type="hidden" asp-for="@HttpContextAccessor.HttpContext.User.Claims.FirstOrDefault(c => c.Type == "username").Value" name="shipTo" />
-                        <button type="submit" class="btn btn-success text-white" form="formExportExcel">Report Excel</button>
+        }
+        <div class="card-body">
+            <form method="post">
+                <h2 class="font-weight-bold my-3" data-aos="fade-up">Recommendation for you</h2>
+                <div class="form-row align-items-end" data-aos="fade-up">
+                    <div class="form-group col-sm-3">
+                        <label class="control-label" for="SubmissionDateFrom">Recommendation Date:</label>
+                        <input id="searchDatePick" class="form-control w-100" type="text" placeholder="Choose Date" asp-for="@Model.recommendationDate" required autocomplete="off" />
                     </div>
-                </form>
+                    <div class="form-group col-sm-3 d-flex align-items-end">
+                        <button type="submit" class="btn btn-success btn-light btn-block text-dark">Search</button>
+                    </div>
 
-                <table id="tableRec" class="table table-hover table-bordered mb-3" width="100%" cellspacing="0">
-                    <thead>
-                        <tr>
-                            <th width="50px">No</th>
-                            <th>Item Code</th>
-                            <th>Item Name</th>
+                </div>
+            </form>
+            <!--Card-->
+            @if (Model.outRecommendationList != null)
+            {
 
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @{
-                            int index = 1;
-                            foreach (var item in Model.outRecommendationList)
-                            {
-                                <tr>
-                                    <td>@index</td>
-                                    <td>@item.item_code</td>
-                                    <td>@item.item_desc</td>
-                                </tr>
-                                index++;
+
+
+
+                <div class="table" data-aos="fade-up">
+
+                    <div class="float-right mb-3" id="btnExportId">
+                        <a href="/LandingPage?q=@Model.recommendationDate&&a=@HttpContextAccessor.HttpContext.User.Claims.FirstOrDefault(c => c.Type == "username").Value" class="btn btn-primary text-black" target="_blank">Report Pdf</a>
+                    </div>
+
+                    <form method="post" asp-page-handler="ExportExcel" id="formExportExcel">
+                        <div class="float-right mb-3 mr-2" id="btnExportId">
+                            <input type="hidden" asp-for="@Model.recommendationDate" name="recDate" />
+                            <input type="hidden" asp-for="@HttpContextAccessor.HttpContext.User.Claims.FirstOrDefault(c => c.Type == "username").Value" name="shipTo" />
+                            <button type="submit" class="btn btn-success text-white" form="formExportExcel">Report Excel</button>
+                        </div>
+                    </form>
+
+                    <table id="tableRec" class="table table-hover table-bordered mb-3" width="100%" cellspacing="0">
+                        <thead>
+                            <tr>
+                                <th width="50px">No</th>
+                                <th>Item Code</th>
+                                <th>Item Name</th>
+
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @{
+                                int index = 1;
+                                foreach (var item in Model.outRecommendationList)
+                                {
+                                    <tr>
+                                        <td>@index</td>
+                                        <td>@item.item_code</td>
+                                        <td>@item.item_desc</td>
+                                    </tr>
+                                    index++;
+                                }
                             }
-                        }
-                    </tbody>
-                </table>
-            </div>
-            <!-- card end-->
+                        </tbody>
+                    </table>
+                </div>
+                <!-- card end-->
 
-            <div class="table" data-aos="fade-up">
-                <h2 class="font-weight-bold my-3">Transaction History:</h2>
-                <h3>@Model.historyInfo</h3>
-                <table id="tableHistory" class="table table-hover table-bordered" width="100%" cellspacing="0">
-                    <thead>
-                        <tr>
-                            <th width="50px">No</th>
-                            <th>Transaction Date</th>
-                            <th>Item Code</th>
-                            <th>Item Name</th>
-                            <th>Quantity</th>
-                            <th>Total Amount</th>
+                <div class="table" data-aos="fade-up">
+                    <h2 class="font-weight-bold my-3">Transaction History:</h2>
+                    <h3>@Model.historyInfo</h3>
+                    <table id="tableHistory" class="table table-hover table-bordered" width="100%" cellspacing="0">
+                        <thead>
+                            <tr>
+                                <th width="50px">No</th>
+                                <th>Transaction Date</th>
+                                <th>Item Code</th>
+                                <th>Item Name</th>
+                                <th>Quantity</th>
+                                <th>Total Amount</th>
 
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @{
-                            int index2 = 1;
-                            foreach (var item in Model.outTransactionHistoryList)
-                            {
-                                <tr>
-                                    <td>@index2</td>
-                                    <td>@item.TRX_DATE</td>
-                                    <td>@item.ITEM_CODE</td>
-                                    <td>@item.ITEM_NAME</td>
-                                    <td class="text-right">@item.SALES_QTY</td>
-                                    <td class="text-right">@item.GROSS_SALES_AMOUNT</td>
-                                </tr>
-                                index2++;
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @{
+                                int index2 = 1;
+                                foreach (var item in Model.outTransactionHistoryList)
+                                {
+                                    <tr>
+                                        <td>@index2</td>
+                                        <td>@item.TRX_DATE</td>
+                                        <td>@item.ITEM_CODE</td>
+                                        <td>@item.ITEM_NAME</td>
+                                        <td class="text-right">@item.SALES_QTY</td>
+                                        <td class="text-right">@item.GROSS_SALES_AMOUNT</td>
+                                    </tr>
+                                    index2++;
+                                }
                             }
+                        </tbody>
+                    </table>
+                </div>
+
+
+            }
+            @if (TempData["NoData"].ToString() == "true")
+            {
+                <div class="w-100 d-flex justify-content-center" data-aos="fade-up">
+                    <img id="imgNoData" style="width:40%" src="~/images/no-data-fp.jpg">
+                </div>
+
+                <style>
+                    @@media screen and (max-width: 600px) {
+                        #imgNoData {
+                            min-width: 100%;
                         }
-                    </tbody>
-                </table>
-            </div>
-
-
-        }
-        @if (TempData["NoData"].ToString() == "true")
-        {
-            <div class="w-100 d-flex justify-content-center" data-aos="fade-up">
-                <img id="imgNoData" style="width:40%" src="~/images/no-data-fp.jpg">
-            </div>
-
-            <style>
-                @@media screen and (max-width: 600px) {
-                    #imgNoData {
-                        min-width: 100%;
                     }
-                }
-            </style>
+                </style>
 
-        }
+            }
 
+        </div>
     </div>
-</div>
+
+}
+
+
 
 
 <script>

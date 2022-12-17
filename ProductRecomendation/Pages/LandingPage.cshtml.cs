@@ -58,7 +58,6 @@ namespace ProductRecomendation.Pages
 
         public string historyInfo { get; set; }
 
-
         UrlString conf = new UrlString();
 
         [BindProperty]
@@ -71,9 +70,10 @@ namespace ProductRecomendation.Pages
                 TempData["NoData"] = "true";
                 var role = User.Claims.FirstOrDefault(c => c.Type == "role")?.Value;
 
-                if (role == "admin" || role == "salesman")
+
+                if (User.Claims.FirstOrDefault(c => c.Type == "username")?.Value == null)
                 {
-                    return RedirectToPage("/MainMenu");
+                    return Page();
                 }
 
                 string rayon = HttpContext.User.Claims.FirstOrDefault(x => x.Type == "rayon_exp_code").Value;

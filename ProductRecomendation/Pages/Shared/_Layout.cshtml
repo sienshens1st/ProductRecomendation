@@ -88,7 +88,7 @@
         <!-- Navbar -->
         <ul class="navbar-nav ml-auto ml-md-12">
 
-            @if (User.Claims.FirstOrDefault(c => c.Type == "role")?.Value == "admin")
+            @if (User.Claims.FirstOrDefault(c => c.Type == "role")?.Value == "admin" || User.Claims.FirstOrDefault(c => c.Type == "role")?.Value == "salesman")
             {
 
                 <li class="nav-item dropdown no-arrow">
@@ -101,7 +101,7 @@
                     </div>
                 </li>
             }
-            else
+            else if (User.Claims.FirstOrDefault(c => c.Type == "username")?.Value == "customer")
             {
                 <li class="nav-item dropdown no-arrow">
                     <a class="nav-link dropdown-toggle text-secondary" href="#" id="userDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -112,7 +112,16 @@
                     </div>
                 </li>
             }
+            else if (User.Claims.FirstOrDefault(c => c.Type == "username")?.Value == null)
+            {
+                        <li class="nav-item">
+                    <a class="nav-link text-secondary" href="/Logout" id="userDropdown" role="button" aria-expanded="false">Login
+        </a>
+        </li>
+            }
         </ul>
+
+
     </nav>
 
 
@@ -135,6 +144,12 @@
             @if (User.Claims.FirstOrDefault(c => c.Type == "role")?.Value == "admin")
             {
 
+                <li id="productManagement" class="nav-item bg-white" runat="server">
+                    <a class="nav-link text-secondary" href="/LandingPage">
+                        <i class="fas fa-fw fa-box"></i>
+                        <span>Landing Page</span>
+                    </a>
+                </li>
                 <li id="productManagement" class="nav-item bg-white" runat="server">
                     <a class="nav-link text-secondary" href="/ProductManagement">
                         <i class="fas fa-fw fa-box"></i>
@@ -162,6 +177,12 @@
             }
             else
             {
+                <li id="productManagement" class="nav-item bg-white" runat="server">
+                    <a class="nav-link text-secondary" href="/LandingPage">
+                        <i class="fas fa-fw fa-box"></i>
+                        <span>Landing Page</span>
+                    </a>
+                </li>
                 <li id="RecommendationSystem" class="nav-item bg-white" runat="server">
                     <a class="nav-link text-secondary" href="~/RecommendationSystem">
                         <i class="fas fa-fw fa-truck"></i>
