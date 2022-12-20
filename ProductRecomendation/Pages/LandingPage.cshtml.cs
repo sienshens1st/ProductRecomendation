@@ -151,10 +151,9 @@ namespace ProductRecomendation.Pages
             outTransactionHistoryList = new List<TransactionHistory>();
             var listResultHistory = JsonConvert.DeserializeObject<IList<TransactionHistory>>(result2.Content);
 
-
             foreach (var item in listResultHistory)
             {
-                var grossvalue = String.Format(CultureInfo.CreateSpecificCulture("id-id"), "Rp. {0:N}", int.Parse(item.GROSS_SALES_AMOUNT));
+                //var grossvalue = String.Format(CultureInfo.CreateSpecificCulture("id-id"), "Rp. {0:N}", item.GROSS_SALES_AMOUNT);
                 var trans_date_parsed = DateTime.ParseExact(item.TRX_DATE, "MM/dd/yyyy",
                                        System.Globalization.CultureInfo.InvariantCulture).ToString("dd-MMM-yyyy");
                 var itemName = _context.tb_product.Where(x => x.item_code == item.ITEM_CODE).FirstOrDefault().item_desc.ToString();
@@ -163,7 +162,7 @@ namespace ProductRecomendation.Pages
                     ITEM_CODE = item.ITEM_CODE,
                     ITEM_NAME = itemName,
                     SALES_QTY = item.SALES_QTY,
-                    GROSS_SALES_AMOUNT = grossvalue.Remove(grossvalue.Length - 1),
+                    GROSS_SALES_AMOUNT = "Rp. " + item.GROSS_SALES_AMOUNT,
                     TRX_DATE = trans_date_parsed
                 });
             };

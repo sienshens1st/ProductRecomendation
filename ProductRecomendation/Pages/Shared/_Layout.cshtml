@@ -7,7 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>EPR - @ViewData["Title"]</title>
     @*<link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-        <link rel="stylesheet" href="~/css/site.css" />*@
+    <link rel="stylesheet" href="~/css/site.css" />*@
 
     <!-- Custom fonts for this template-->
     <link href="~/potionLib/vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
@@ -33,7 +33,7 @@
     <script src="~/potionLib/js/popovers.js"></script>
     <script src="~/potionLib/js/tooltips.js"></script>
     <script src="~/potionLib/js/potion-custom.js"></script>
-@*
+    @*
     <link rel="stylesheet" type="text/css" href="css/datatables.min.css" />
 
     <!-- Page level plugin JavaScript-->
@@ -41,7 +41,7 @@
     <script src="potionLib/vendor/datatables/jquery.dataTables.js"></script>
     <script src="potionLib/vendor/datatables/dataTables.bootstrap4.js"></script>*@
     <!-- DataTables-->
-        <script type="text/javascript" charset="utf8" src="potionLib/vendor/data_tables/jquery.dataTables.js"></script>
+    <script type="text/javascript" charset="utf8" src="potionLib/vendor/data_tables/jquery.dataTables.js"></script>
     <link rel="stylesheet" type="text/css" href="potionLib/vendor/data_tables/jquery.dataTables.css">
 
 
@@ -101,7 +101,7 @@
                     </div>
                 </li>
             }
-            else if (User.Claims.FirstOrDefault(c => c.Type == "username")?.Value == "customer")
+            else if (User.Claims.FirstOrDefault(c => c.Type == "role")?.Value == "customer")
             {
                 <li class="nav-item dropdown no-arrow">
                     <a class="nav-link dropdown-toggle text-secondary" href="#" id="userDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -114,10 +114,9 @@
             }
             else if (User.Claims.FirstOrDefault(c => c.Type == "username")?.Value == null)
             {
-                        <li class="nav-item">
-                    <a class="nav-link text-secondary" href="/Logout" id="userDropdown" role="button" aria-expanded="false">Login
-        </a>
-        </li>
+                <li class="nav-item">
+                    <a class="nav-link text-secondary" href="/Logout" id="userDropdown" role="button" aria-expanded="false">Login</a>
+                </li>
             }
         </ul>
 
@@ -256,12 +255,12 @@
 
     <!--Select 2-->
     <script>
-        $(document).ready(function() {
+        $(document).ready(function () {
             AOS.init({
-              duration: 1000,
-              easing: "ease-in-out",
-              once: true,
-              mirror: false
+                duration: 1000,
+                easing: "ease-in-out",
+                once: true,
+                mirror: false
             });
 
             $('.js-example-basic-multiple').select2();
