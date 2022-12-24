@@ -41,58 +41,87 @@
             </button>
         </div>
 
-
-        <table class="table" id="dataTable" width="100%" cellspacing="0">
-            <thead class="thead-light">
-                <tr>
-                    <th scope="col">Product Code</th>
-                    <th scope="col">Product Desc</th>
-                    <th scope="col">Product Family</th>
-                    <th scope="col">Activation</th>
-                    <th scope="col">Last Update By</th>
-                    <th scope="col">Last Update Date</th>
-                    <th scope="col"></th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var item in Model.tb_Products)
-                {
+        <div class="table-responsive">
+            <table class="table" id="dataTable" width="100%" cellspacing="0">
+                <thead class="thead-light">
                     <tr>
-
-                        <td>@(item.item_code)</td>
-                        <td>@item.item_desc</td>
-                        <td>@item.product_family_desc</td>
-                        <td class="@(item.flag_active =="Y" ? "text-success" : "text-danger")"> @(item.flag_active =="Y" ? "Active" : "Inactive")</td>
-                        <td>@(item.lastupdate_by)</td>
-                        <td>@item.lastupdate_date.ToString("d MMM yyyy HH:mm:ss")</td>
-                        <td>
-                            @if (item.flag_active == "Y")
-                            {
-                                <button type="button" class="btn btn-primary ml-2" data-toggle="modal"
-                                data-target="#EditProduct" onclick='editProduct(@Html.Raw(Json.Serialize(item)));'>
-                                    Edit
-                                </button>
-
-                                <button type="button" class="btn btn-danger ml-2" data-toggle="modal"
-                                data-target="#Deactivate" onclick="deactivateItem('@item.item_id');">
-                                    Deactivate
-                                </button>
-                            }
-                            else
-                            {
-                                <button type="button" class="btn btn-warning ml-2" data-toggle="modal"
-                                data-target="#Activate" onclick="activateItem('@item.item_id');">
-                                    Activate
-                                </button>
-                            }
-                        </td>
+                        <th scope="col">Product Code</th>
+                        <th scope="col">Product Desc</th>
+                        <th scope="col">Product Family</th>
+                        <th scope="col">Activation</th>
+                        <th scope="col">Last Update By</th>
+                        <th scope="col">Last Update Date</th>
+                        <th scope="col">View Product</th>
+                        <th scope="col"></th>
                     </tr>
-                }
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.tb_Products)
+                    {
+                        <tr>
+
+                            <td>@(item.item_code)</td>
+                            <td>@item.item_desc</td>
+                            <td>@item.product_family_desc</td>
+                            <td class="@(item.flag_active =="Y" ? "text-success" : "text-danger")"> @(item.flag_active == "Y" ? "Active" : "Inactive")</td>
+                            <td>@(item.lastupdate_by)</td>
+                            <td>@item.lastupdate_date.ToString("d MMM yyyy HH:mm:ss")</td>
+                            <td><a href="#" data-toggle="modal" data-target="#openImageModal" onclick='openImage(@Html.Raw(Json.Serialize(item.product_image)));'>View</a></td>
+                            <td>
+                                @if (item.flag_active == "Y")
+                                {
+                                    <button type="button" class="btn btn-primary ml-2" data-toggle="modal"
+                                    data-target="#EditProduct" onclick='editProduct(@Html.Raw(Json.Serialize(item)));'>
+                                        Edit
+                                    </button>
+
+                                    <button type="button" class="btn btn-danger ml-2" data-toggle="modal"
+                                    data-target="#Deactivate" onclick="deactivateItem('@item.item_id');">
+                                        Deactivate
+                                    </button>
+                                }
+                                else
+                                {
+                                    <button type="button" class="btn btn-warning ml-2" data-toggle="modal"
+                                    data-target="#Activate" onclick="activateItem('@item.item_id');">
+                                        Activate
+                                    </button>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+
+        </div>
+
     </div>
 </div>
 @*end table*@
+
+
+
+<!-- Modal image Product -->
+<div class="modal fade" id="openImageModal" tabindex="-1" role="dialog" aria-labelledby="openImageModal" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Product Image</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+                <div class="modal-body align-content-center text-center d-flex justify-content-center">
+                <img src="~/ProductImage/noproductimage.jpeg" onerror='this.src="../ProductImage/noproductimage.jpeg";console.log("onerror triggered");' class="img-fluid img-thumbnail" width="450px" id="imageAttr" />
+
+
+                </div>
+
+        </div>
+    </div>
+</div>
+@*end image product modal *@
+
 
 <!-- Modal Add New Product -->
 <div class="modal fade" id="AddProduct" tabindex="-1" role="dialog" aria-labelledby="AddProduct" aria-hidden="true">
@@ -104,7 +133,7 @@
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
-            <form id="formAddProduct" asp-page-handler="AddProduct" method="post">
+            <form id="formAddProduct" asp-page-handler="AddProduct" method="post" enctype="multipart/form-data">
                 <div class="modal-body">
                     <div class="form-group">
                         <label for="ItemCode">Product Code <span class="text-danger">*</span></label>
@@ -120,6 +149,14 @@
                             <option value="Farma">Farma</option>
                             <option value="Consumer Goods">Consumer Goods</option>
                         </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="AppsIcon">Product Image</label>
+                        <div class="custom-file">
+                            <input type="file" class="custom-file-input" id="fileInputAdd" name="fileInputAdd">
+                            <label class="custom-file-label" for="AppsIcon">Choose file</label>
+                            <small class="text-muted"> &nbsp; &nbsp;Max allowed file size is 2mb</small>
+                        </div>
                     </div>
                 </div>
             </form>
@@ -142,7 +179,7 @@
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
-            <form id="formEditProduct" asp-page-handler="EditProduct" method="post">
+            <form id="formEditProduct" asp-page-handler="EditProduct" method="post" enctype="multipart/form-data">
                 <div class="modal-body">
                     <input type="hidden" id="hdnItemId_Edit" asp-for="InputEditProduct.item_id" value="" />
                     <div class="form-group">
@@ -159,6 +196,14 @@
                             <option value="Farma">Farma</option>
                             <option value="Consumer Goods">Consumer Goods</option>
                         </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="AppsIcon">Product Image</label>
+                        <div class="custom-file">
+                            <input type="file" class="custom-file-input" id="fileInputEdit" name="fileInputEdit">
+                            <label class="custom-file-label" for="AppsIcon">Choose file</label>
+                            <small class="text-muted"> &nbsp; &nbsp;Max allowed file size is 2mb</small>
+                        </div>
                     </div>
                 </div>
             </form>
@@ -223,29 +268,70 @@
 
 
 @section Scripts{
-<script>
+    <script>
 
 
-    $(document).ready(function () {
-        $('.select2').select2();
-    });
+        $(document).ready(function () {
+            $('.select2').select2();
+        });
 
-    function activateItem(itemid) {
-        $("#hdnItemId_Activate").val(itemid);
-    }
-    function deactivateItem(itemid) {
-        $("#hdnItemId_Deactivate").val(itemid);
-    }
+        function activateItem(itemid) {
+            $("#hdnItemId_Activate").val(itemid);
+        }
+        function deactivateItem(itemid) {
+            $("#hdnItemId_Deactivate").val(itemid);
+        }
 
-    function editProduct(item_row) {
-    console.log(item_row);
-    $("#hdnItemId_Edit").val(item_row["item_id"]);
-    $("#txtItemCodeEdit").val(item_row["item_code"]);
-    $("#txtItemDescEdit").val(item_row["item_desc"]);
-    $("#txtProductFamilyEdit").val(item_row["product_family_desc"]);
+        function editProduct(item_row) {
+            console.log(item_row);
+            $("#hdnItemId_Edit").val(item_row["item_id"]);
+            $("#txtItemCodeEdit").val(item_row["item_code"]);
+            $("#txtItemDescEdit").val(item_row["item_desc"]);
+            $("#txtProductFamilyEdit").val(item_row["product_family_desc"]);
 
-    }
+        }
 
-</script>
+
+        let max_size = 2000 * 1024;
+
+        let productImageAdd = document.querySelector("#fileInputAdd");
+        productImageAdd.addEventListener('change', () => {
+            let files = productImageAdd.files;
+            if (files.length > 0) {
+                if (files[0].size > max_size) {
+                    alert("Please make sure your file is in png or jpg format and less than " + max_size / 1000 + " kb");
+                    $('#fileInputAdd').val(null);
+
+                }
+            }
+        })
+
+
+        let productImageEdit = document.querySelector("#fileInputEdit");
+        productImageEdit.addEventListener('change', () => {
+            let files = productImageEdit.files;
+            if (files.length > 0) {
+                if (files[0].size > max_size) {
+                    alert("Please make sure your file is in png or jpg format and less than " + max_size / 1000 + " kb");
+                    $('#fileInputEdit').val(null);
+
+                }
+            }
+        })
+
+
+        function openImage(image){
+            console.log("clicked");
+
+            console.log(image);
+            if(image != null){
+                $("#imageAttr").attr("src", "../ProductImage/" + image);  
+            }else{
+             $("#imageAttr").attr("src", "../ProductImage/noproductimage.jpeg");
+            };
+        }
+
+
+    </script>
 
 }

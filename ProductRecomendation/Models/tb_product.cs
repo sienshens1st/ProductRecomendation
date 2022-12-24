@@ -18,5 +18,7 @@ namespace ProductRecomendation.Models
         public string lastupdate_by { get; set; }
 
         public DateTime lastupdate_date { get; set; }
+
+        public string product_image { get; set; }
     }
 }

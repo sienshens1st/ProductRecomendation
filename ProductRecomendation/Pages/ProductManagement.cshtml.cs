@@ -1,4 +1,5 @@
 using egitlab_PotionNetCore.Security;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
@@ -6,7 +7,9 @@ using ProductRecomendation.Data;
 using ProductRecomendation.Models;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Net.Http.Headers;
 using System.Threading.Tasks;
 
 namespace ProductRecomendation.Pages
@@ -41,18 +44,30 @@ namespace ProductRecomendation.Pages
             tb_Products = await products;
         }
 
-
-        public IActionResult OnPostAddProduct()
+        public async Task<IActionResult> OnPostAddProductAsync(IFormFile fileInputAdd)
         {
             try
             {
-                bool isProductExist = _context.tb_product.Where(x=> x.item_code == InputAddUProduct.item_code).Any();
+                bool isProductExist = _context.tb_product.Where(x => x.item_code == InputAddUProduct.item_code).Any();
                 if (isProductExist)
                 {
                     TempData["MessageFailed"] = "Product Exists!";
                     return RedirectToPage("/ProductManagement");
                 }
 
+
+                string datetime = DateTime.Now.ToString("yyyyMMddHHmmss");
+                string uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot\\ProductImage");
+                var uniquefilename = datetime + "-" + ContentDispositionHeaderValue.Parse(fileInputAdd.ContentDisposition).FileName.Trim('"');
+                var filepath = Path.Combine(uploadsFolder, uniquefilename);
+                
+                using (var fileStream = new FileStream(filepath, FileMode.Create))
+                {
+                    await fileInputAdd.CopyToAsync(fileStream);
+                }
+
+
+                InputAddUProduct.product_image = uniquefilename;
                 InputAddUProduct.flag_active = "Y";
                 InputAddUProduct.lastupdate_by = HttpContext.User.Claims.FirstOrDefault(x => x.Type == "username").Value;
                 InputAddUProduct.lastupdate_date = DateTime.Now;
@@ -72,11 +87,27 @@ namespace ProductRecomendation.Pages
         }
 
 
-        public IActionResult OnPostEditProduct()
+        public async Task<IActionResult> OnPostEditProductAsync(IFormFile fileInputEdit)
         {
             try
             {
                 var item = _context.tb_product.Where(x => x.item_id == InputEditProduct.item_id).FirstOrDefault();
+
+
+                if (fileInputEdit != null)
+                {
+                    string datetime = DateTime.Now.ToString("yyyyMMddHHmmss");
+                    string uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot\\ProductImage");
+                    var uniquefilename = datetime + "-" + ContentDispositionHeaderValue.Parse(fileInputEdit.ContentDisposition).FileName.Trim('"');
+                    var filepath = Path.Combine(uploadsFolder, uniquefilename);
+
+                    using (var fileStream = new FileStream(filepath, FileMode.Create))
+                    {
+                        await fileInputEdit.CopyToAsync(fileStream);
+                    }
+                    item.product_image = uniquefilename;
+                }
+
 
 
                 item.item_desc = InputEditProduct.item_desc;

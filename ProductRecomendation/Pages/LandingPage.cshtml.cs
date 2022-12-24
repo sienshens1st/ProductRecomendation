@@ -41,6 +41,7 @@ namespace ProductRecomendation.Pages
             public string item_code { get; set; }
             public string item_desc { get; set; }
             public string flag_active { get; set; }
+            public string product_image { get; set; }
         }
 
         public class TransactionHistory
@@ -50,6 +51,7 @@ namespace ProductRecomendation.Pages
             public string ITEM_NAME { get; set; }
             public string SALES_QTY { get; set; }
             public string TRX_DATE { get; set; }
+            public string product_image { get; set; }
         }
 
         public IList<OutputRecommendation> outRecommendationList { get; set; }
@@ -129,7 +131,7 @@ namespace ProductRecomendation.Pages
 
                 if (itemDb.flag_active == "N") continue;
 
-                outRecommendationList.Add(new OutputRecommendation { item_code = item, item_desc = itemDb.item_desc, flag_active = itemDb.flag_active });
+                outRecommendationList.Add(new OutputRecommendation { item_code = item, item_desc = itemDb.item_desc, flag_active = itemDb.flag_active, product_image = itemDb.product_image });
 
                 if (outRecommendationList.Count == 10) break;
             };
@@ -156,14 +158,16 @@ namespace ProductRecomendation.Pages
                 //var grossvalue = String.Format(CultureInfo.CreateSpecificCulture("id-id"), "Rp. {0:N}", item.GROSS_SALES_AMOUNT);
                 var trans_date_parsed = DateTime.ParseExact(item.TRX_DATE, "MM/dd/yyyy",
                                        System.Globalization.CultureInfo.InvariantCulture).ToString("dd-MMM-yyyy");
-                var itemName = _context.tb_product.Where(x => x.item_code == item.ITEM_CODE).FirstOrDefault().item_desc.ToString();
+                var itemGet = _context.tb_product.Where(x => x.item_code == item.ITEM_CODE).FirstOrDefault();
                 outTransactionHistoryList.Add(new TransactionHistory
                 {
                     ITEM_CODE = item.ITEM_CODE,
-                    ITEM_NAME = itemName,
+                    ITEM_NAME = itemGet.item_desc,
                     SALES_QTY = item.SALES_QTY,
                     GROSS_SALES_AMOUNT = "Rp. " + item.GROSS_SALES_AMOUNT,
-                    TRX_DATE = trans_date_parsed
+                    TRX_DATE = trans_date_parsed,
+                    product_image = itemGet.product_image
+
                 });
             };
 

@@ -56,6 +56,7 @@ namespace ProductRecomendation.Pages
             public string item_code { get; set; }
             public string item_desc { get; set; }
             public string flag_active { get; set; }
+            public string product_image { get; set; }
         }
 
         public class ListExport
@@ -205,7 +206,7 @@ namespace ProductRecomendation.Pages
 
                 if (itemDb.flag_active == "N") continue;
 
-                outRecommendationList.Add(new OutputRecommendation { item_code = item, item_desc = itemDb.item_desc, flag_active = itemDb.flag_active });
+                outRecommendationList.Add(new OutputRecommendation { item_code = item, item_desc = itemDb.item_desc, flag_active = itemDb.flag_active, product_image = itemDb.product_image });
 
                 if (outRecommendationList.Count == 10) break;
             };
